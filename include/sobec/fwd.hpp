@@ -48,6 +48,14 @@
 
 namespace sobec {
 
+// Cost Anticipated-state
+template <typename Scalar>
+class ResidualModelAnticipatedStateTpl;
+template <typename Scalar>
+struct ResidualDataAnticipatedStateTpl;
+typedef ResidualModelAnticipatedStateTpl<double> ResidualModelAnticipatedState;
+typedef ResidualDataAnticipatedStateTpl<double> ResidualDataAnticipatedState;
+
 // Cost COM-vel
 template <typename Scalar>
 class ResidualModelCoMVelocityTpl;
