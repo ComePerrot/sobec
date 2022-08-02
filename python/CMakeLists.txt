@@ -2,6 +2,7 @@ set(${PY_NAME}_SOURCES
     main.cpp
     std-containers.cpp
     flexibility_compensation.cpp
+    crocomplements/residual-anticipated-state.cpp
     crocomplements/residual-com-velocity.cpp
     crocomplements/residual-vel-collision.cpp
     crocomplements/residual-cop.cpp

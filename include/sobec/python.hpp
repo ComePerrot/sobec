@@ -8,6 +8,7 @@ namespace sobec {
 namespace python {
 
 void exposeStdContainers();
+void exposeResidualAnticipatedState();
 void exposeResidualCoMVelocity();
 void exposeResidualVelCollision();
 void exposeResidualCenterOfPressure();

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SOBEC_ANTICIPATED_STATE_HPP_
-#define SOBEC_ANTICIPATED_STATE_HPP_
+#ifndef SOBEC_RESIDUAL_ANTICIPATED_STATE_HPP_
+#define SOBEC_RESIDUAL_ANTICIPATED_STATE_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"

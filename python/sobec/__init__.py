@@ -1,6 +1,7 @@
 # flake8: noqa
 
 from .sobec_pywrap import (
+    ResidualModelAnticipatedState,
     ResidualModelCoMVelocity,
     ResidualModelVelCollision,
     ActivationModelQuadRef,
