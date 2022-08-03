@@ -14,6 +14,7 @@
 #include <crocoddyl/multibody/residuals/control-gravity.hpp>
 #include <crocoddyl/multibody/residuals/state.hpp>
 
+#include "sobec/crocomplements/residual-anticipated-state.hpp"
 #include "sobec/crocomplements/residual-com-velocity.hpp"
 #include "sobec/crocomplements/residual-fly-high.hpp"
 // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
@@ -40,6 +41,9 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
     // case CostModelTypes::CostModelResidualState:
     //   os << "CostModelResidualState";
     //   break;
+    case CostModelTypes::CostModelAnticipatedState:
+      os << "CostModelAnticipatedState";
+      break;
     case CostModelTypes::CostModelResidualControl:
       os << "CostModelResidualControl";
       break;
@@ -114,6 +118,12 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     //                                                         state->rand(),
     //                                                         nu));
     //   break;
+    case CostModelTypes::CostModelAnticipatedState:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
+          state, activation_factory.create(activation_type, state->get_ndx()),
+          boost::make_shared<sobec::ResidualModelAnticipatedState>(
+              state, nu, Eigen::VectorXd::Random(1)[0]));
+      break;
     case CostModelTypes::CostModelResidualControl:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state, activation_factory.create(activation_type, nu),
