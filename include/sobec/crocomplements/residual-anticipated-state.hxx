@@ -60,7 +60,7 @@ void ResidualModelAnticipatedStateTpl<Scalar>::calcDiff(
                  << "x has wrong dimension (it should be " +
                         std::to_string(state_->get_nx()) + ")");
   }
-  Data* d = static_cast<Data*>(data.get());
+  // Data* d = static_cast<Data*>(data.get());
   const std::size_t nv = state_->get_nv();
 
   MatrixXs Jx = MatrixXs::Zero(state_->get_ndx(), state_->get_ndx());

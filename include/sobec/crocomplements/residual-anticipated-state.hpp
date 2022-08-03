@@ -20,15 +20,9 @@ namespace sobec {
 using namespace crocoddyl;
 
 /**
- * @brief State residual
+ * @brief Anticipated state residual
  *
- * This residual function defines the state tracking as
- * \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
- * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference
- * states, respectively, which belong to the state manifold \f$\mathcal{X}\f$.
- * Note that the dimension of the residual vector is obtained from
- * `StateAbstract::get_ndx()`. Furthermore, the Jacobians of the residual
- * function are computed analytically.
+ * residual = q + v * dt
  *
  * As described in `ResidualModelAbstractTpl()`, the residual value and its
  * derivatives are calculated by `calc` and `calcDiff`, respectively.
@@ -53,23 +47,23 @@ class ResidualModelAnticipatedStateTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the state residual model
+   * @brief Initialize the anticipated state residual model
    *
-   * @param[in] state       State of the multibody system
-   * @param[in] xref        Reference state
-   * @param[in] nu          Dimension of the control vector
+   * @param[in] state             State of the multibody system
+   * @param[in] nu                Dimension of the control vector
+   * @param[in] anticipated_time  Dimension of the control vector
    */
   ResidualModelAnticipatedStateTpl(
       boost::shared_ptr<typename Base::StateAbstract> state,
       const std::size_t nu, const double& anticipated_time);
 
   /**
-   * @brief Initialize the state residual model
+   * @brief Initialize the anticipated state residual model
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State of the multibody system
-   * @param[in] xref        Reference state
+   * @param[in] state             State of the multibody system
+   * @param[in] anticipated_time  Dimension of the control vector
    */
   ResidualModelAnticipatedStateTpl(
       boost::shared_ptr<typename Base::StateAbstract> state,
@@ -78,7 +72,7 @@ class ResidualModelAnticipatedStateTpl
   virtual ~ResidualModelAnticipatedStateTpl();
 
   /**
-   * @brief Compute the state residual
+   * @brief Compute the anticipated state residual
    *
    * @param[in] data  State residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -89,7 +83,7 @@ class ResidualModelAnticipatedStateTpl
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the Jacobians of the state residual
+   * @brief Compute the Jacobians of the anticipated state residual
    *
    * @param[in] data  State residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -100,7 +94,7 @@ class ResidualModelAnticipatedStateTpl
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Print relevant information of the state residual
+   * @brief Print relevant information of the anticipated state residual
    *
    * @param[out] os  Output stream object
    */
