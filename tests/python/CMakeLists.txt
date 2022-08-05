@@ -3,6 +3,7 @@
 add_python_unit_test("py-vel-collision" "tests/python/test_vel_collision.py"
                      "python")
 add_python_unit_test("py-cop" "tests/python/test_cop.py" "python")
+ADD_PYTHON_UNIT_TEST("py-anticipated-state" "tests/python/test_anticipated_state.py" "python")
 add_python_unit_test("py-fly-high" "tests/python/test_fly_high.py" "python")
 add_python_unit_test("py-test-collision" "tests/python/test_feet_collision.py"
                      "python")

@@ -77,7 +77,8 @@ void exposeResidualAnticipatedState() {
       boost::shared_ptr<ResidualDataAnticipatedState> >();
 
   bp::class_<ResidualDataAnticipatedState, bp::bases<ResidualDataAbstract> >(
-      "ResidualDataAnticipatedState", "Data for anticipated state residual.\n\n",
+      "ResidualDataAnticipatedState",
+      "Data for anticipated state residual.\n\n",
       bp::init<ResidualModelAnticipatedState*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),
           "Create anticipated state residual data.\n\n"

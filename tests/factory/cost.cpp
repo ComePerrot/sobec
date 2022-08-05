@@ -120,9 +120,9 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     //   break;
     case CostModelTypes::CostModelAnticipatedState:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, activation_factory.create(activation_type, state->get_ndx()),
+          state, activation_factory.create(activation_type, state->get_nv()),
           boost::make_shared<sobec::ResidualModelAnticipatedState>(
-              state, nu, Eigen::VectorXd::Random(1)[0]));
+              state, state->get_nv(), Eigen::VectorXd::Random(1)[0]));
       break;
     case CostModelTypes::CostModelResidualControl:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(

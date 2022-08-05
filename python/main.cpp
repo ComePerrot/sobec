@@ -10,6 +10,7 @@ BOOST_PYTHON_MODULE(sobec_pywrap) {
   eigenpy::enableEigenPy();
   ENABLE_SPECIFIC_MATRIX_TYPE(Eigen::VectorXi);
   sobec::python::exposeStdContainers();
+  sobec::python::exposeResidualAnticipatedState();
   sobec::python::exposeResidualVelCollision();
   sobec::python::exposeResidualCoMVelocity();
   sobec::python::exposeResidualCenterOfPressure();
