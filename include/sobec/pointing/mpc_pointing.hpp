@@ -93,7 +93,10 @@ class MPC_Point {
   MPCSettings_Point &get_settings() { return settings_; }
 
   const Eigen::VectorXd &get_x0() const { return x0_; }
-  void set_x0(const Eigen::VectorXd &x0) { x0_ = x0; }
+
+  const Eigen::VectorXd &get_u0() const { return u0_; }
+
+  const Eigen::MatrixXd &get_K0() const { return K0_; }
 
   OCP_Point &get_OCP() { return OCP_; }
   void set_OCP(const OCP_Point &OCP) { OCP_ = OCP; }
