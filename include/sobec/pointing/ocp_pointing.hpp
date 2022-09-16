@@ -16,6 +16,7 @@ struct OCPSettings_Point {
 class OCP_Point {
  private:
   OCPSettings_Point settings_;
+  RobotDesigner designer_;
   ModelMaker modelMaker_;
   DDP ddp_;
 

@@ -16,6 +16,19 @@ void OCP_Point::initialize(const OCPSettings_Point &OCPSettings,
 
   buildSolver(x0);
 
+  // horizon settings
+  std::vector<Eigen::VectorXd> xs_init;
+  std::vector<Eigen::VectorXd> us_init;
+  Eigen::VectorXd zero_u = Eigen::VectorXd::Zero(designer_.get_rModel().nv - 6);
+
+  for (std::size_t i = 0; i < horizon_length_; i++) {
+    warm_xs_.push_back(x0);
+    warm_us_.push_back(zero_u);
+  }
+  xs_init.push_back(x0);
+
+  ddp_->solve(xs_init, us_init, 500, false);
+
   initialized_ = true;
 }
 

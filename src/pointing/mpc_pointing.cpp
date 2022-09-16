@@ -24,7 +24,10 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
   designer_ = design;
   OCP_ = OCP;
 
-  x0_ = shapeState(q0, v0);
+  x0_.resize(designer_.get_rModel().nq + designer_.get_rModel().nv);
+  x0_ << shapeState(q0, v0);
+  designer_.updateReducedModel(x0_);
+  designer_.updateCompleteModel(q0);
 
   // Setup target
   setTarget(tool_se3_target);
