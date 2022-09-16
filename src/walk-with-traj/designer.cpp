@@ -147,6 +147,10 @@ const pinocchio::SE3 &RobotDesigner::get_RF_frame() {
   return rData_.oMf[rightFootId_];
 }
 
+const pinocchio::SE3 &RobotDesigner::get_EndEff_frame() {
+  return rData_.oMf[EndEffectorId_];
+}
+
 double RobotDesigner::getRobotMass() {
   mass_ = 0;
   for (pinocchio::Inertia &I : rModel_.inertias) mass_ += I.mass();

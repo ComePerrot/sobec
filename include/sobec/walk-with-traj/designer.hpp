@@ -61,6 +61,7 @@ class RobotDesigner {
 
   const pinocchio::SE3 &get_LF_frame();
   const pinocchio::SE3 &get_RF_frame();
+  const pinocchio::SE3 &get_EndEff_frame();
 
   double getRobotMass();
 
