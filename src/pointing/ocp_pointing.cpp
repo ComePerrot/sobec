@@ -134,4 +134,8 @@ void OCP_Point::changeGoaleTrackingWeights() {
   }
 }
 
+Eigen::VectorXd OCP_Point::get_torque() { return (ddp_->get_us()[0]); }
+
+Eigen::MatrixXd OCP_Point::get_gain() { return (ddp_->get_K()[0]); }
+
 }  // namespace sobec

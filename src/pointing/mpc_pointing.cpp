@@ -32,6 +32,8 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
   // Init OCP
   OCP_.solve(x0_);
 
+  u0_ = OCP_.get_torque();
+  K0_ = OCP_.get_gain();
   initialized_ = true;
 }
 
@@ -45,6 +47,8 @@ void MPC_Point::iterate(const Eigen::VectorXd &q_current,
   updateTarget(tool_se3_target);
   updateOCP();
   OCP_.solve(x0_);
+  u0_ = OCP_.get_torque();
+  K0_ = OCP_.get_gain();
 }
 
 void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
@@ -55,8 +59,7 @@ void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
   if (settings_.use_mocap == 1 || settings_.use_mocap == 2) {
     tool_se3_hole_ =
         tool_se3_target.act(settings_.holes_offsets[current_hole_]);
-    oMtarget_ = designer_.get_rData().oMf[designer_.get_EndEff_id()].act(
-        tool_se3_hole_);
+    oMtarget_ = designer_.get_EndEff_frame().act(tool_se3_hole_);
   } else {
     oMtarget_.translation() = settings_.targetPos;
 
@@ -86,8 +89,7 @@ void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
 void MPC_Point::updateTarget(pinocchio::SE3 tool_se3_target) {
   if (settings_.use_mocap == 0 || settings_.use_mocap == 1) {
     tool_se3_hole_ =
-        designer_.get_rData().oMf[designer_.get_EndEff_id()].actInv(
-            list_oMhole_[current_hole_]);
+        designer_.get_EndEff_frame().actInv(list_oMhole_[current_hole_]);
     position_error_ = tool_se3_hole_.translation().norm();
   } else if (settings_.use_mocap == 2) {
     tool_se3_hole_ =
@@ -96,8 +98,7 @@ void MPC_Point::updateTarget(pinocchio::SE3 tool_se3_target) {
     position_error_ = tool_se3_hole_.translation().norm();
 
     if (position_error_ < 0.05 && drilling_state_ == 2) {
-      oMtarget_ = designer_.get_rData().oMf[designer_.get_EndEff_id()].act(
-          tool_se3_hole_);
+      oMtarget_ = designer_.get_EndEff_frame().act(tool_se3_hole_);
 
       setHolesPlacement();
       OCP_.updateGoalPosition(list_oMhole_[current_hole_].translation());

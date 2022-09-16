@@ -51,6 +51,9 @@ class OCP_Point {
   void changeGoalCostActivation(const size_t index, const bool value);
   void changeGoaleTrackingWeights();
 
+  Eigen::VectorXd get_torque();
+  Eigen::MatrixXd get_gain();
+
   size_t get_horizonLength() { return (horizon_length_); };
 };
 

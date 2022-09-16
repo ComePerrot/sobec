@@ -39,6 +39,8 @@ class MPC_Point {
   boost::shared_ptr<crocoddyl::SolverFDDP> ddp_;
 
   Eigen::VectorXd x0_;
+  Eigen::VectorXd u0_;
+  Eigen::MatrixXd K0_;
 
   // MPC State
   size_t current_hole_ = 0;
