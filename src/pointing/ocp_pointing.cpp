@@ -4,14 +4,17 @@ namespace sobec {
 OCP_Point::OCP_Point() {}
 
 OCP_Point::OCP_Point(const OCPSettings_Point &OCPSettings,
-                     const ModelMaker &modelMaker, const Eigen::VectorXd x0) {
-  initialize(OCPSettings, modelMaker, x0);
+                     RobotDesigner &designer, const ModelMaker &modelMaker,
+                     const Eigen::VectorXd x0) {
+  initialize(OCPSettings, designer, modelMaker, x0);
 }
 
 void OCP_Point::initialize(const OCPSettings_Point &OCPSettings,
+                           RobotDesigner &designer,
                            const ModelMaker &modelMaker,
                            const Eigen::VectorXd x0) {
   settings_ = OCPSettings;
+  designer_ = designer;
   modelMaker_ = modelMaker;
 
   buildSolver(x0);
@@ -21,9 +24,9 @@ void OCP_Point::initialize(const OCPSettings_Point &OCPSettings,
   std::vector<Eigen::VectorXd> us_init;
   Eigen::VectorXd zero_u = Eigen::VectorXd::Zero(designer_.get_rModel().nv - 6);
 
-  for (std::size_t i = 0; i < horizon_length_; i++) {
-    warm_xs_.push_back(x0);
-    warm_us_.push_back(zero_u);
+  for (std::size_t i = 0; i < settings_.horizon_length; i++) {
+    xs_init.push_back(x0);
+    us_init.push_back(zero_u);
   }
   xs_init.push_back(x0);
 
@@ -87,14 +90,14 @@ void OCP_Point::changeTarget(const size_t index,
       IAM_->get_differential());
   frameTranslationResidual_ = boost::static_pointer_cast<
       crocoddyl::ResidualModelFrameTranslation>(
-      DAM_->get_costs()->get_costs().at("gripperPose")->cost->get_residual());
+      DAM_->get_costs()->get_costs().at("gripperPosition")->cost->get_residual());
 
   frameTranslationResidual_->set_reference(position);
 }
 void OCP_Point::updateGoalPosition(
     const Eigen::Ref<const Eigen::Vector3d> position) {
-  for (size_t modelIndex = 0; modelIndex < horizon_length_; modelIndex++) {
-    if (modelIndex == horizon_length_) {
+  for (size_t modelIndex = 0; modelIndex < settings_.horizon_length; modelIndex++) {
+    if (modelIndex == settings_.horizon_length) {
       IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
           ddp_->get_problem()->get_terminalModel());
     } else {
@@ -106,13 +109,13 @@ void OCP_Point::updateGoalPosition(
         IAM_->get_differential());
     frameTranslationResidual_ = boost::static_pointer_cast<
         crocoddyl::ResidualModelFrameTranslation>(
-        DAM_->get_costs()->get_costs().at("gripperPose")->cost->get_residual());
+        DAM_->get_costs()->get_costs().at("gripperPosition")->cost->get_residual());
 
     frameTranslationResidual_->set_reference(position);
   }
 }
 void OCP_Point::changeGoalCostActivation(const size_t index, const bool value) {
-  if (index == horizon_length_) {
+  if (index == settings_.horizon_length) {
     IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
         ddp_->get_problem()->get_terminalModel());
   } else {
@@ -122,18 +125,18 @@ void OCP_Point::changeGoalCostActivation(const size_t index, const bool value) {
   DAM_ = boost::static_pointer_cast<
       crocoddyl::DifferentialActionModelContactFwdDynamics>(
       IAM_->get_differential());
-  DAM_->get_costs()->get_costs().at("gripperPose")->active = value;
-  DAM_->get_costs()->get_costs().at("gripperRot")->active = value;
+  DAM_->get_costs()->get_costs().at("gripperPosition")->active = value;
+  DAM_->get_costs()->get_costs().at("gripperRotation")->active = value;
 }
 void OCP_Point::changeGoaleTrackingWeights() {
-  for (size_t modelIndex = 0; modelIndex < horizon_length_; modelIndex++) {
-    if (modelIndex == horizon_length_) {
+  for (size_t modelIndex = 0; modelIndex < settings_.horizon_length; modelIndex++) {
+    if (modelIndex == settings_.horizon_length) {
       IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
           ddp_->get_problem()->get_terminalModel());
       DAM_ = boost::static_pointer_cast<
           crocoddyl::DifferentialActionModelContactFwdDynamics>(
           IAM_->get_differential());
-      DAM_->get_costs()->get_costs().at("gripperPose")->weight =
+      DAM_->get_costs()->get_costs().at("gripperPosition")->weight =
           terminal_goal_weight_;
     } else {
       IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
@@ -141,7 +144,7 @@ void OCP_Point::changeGoaleTrackingWeights() {
       DAM_ = boost::static_pointer_cast<
           crocoddyl::DifferentialActionModelContactFwdDynamics>(
           IAM_->get_differential());
-      DAM_->get_costs()->get_costs().at("gripperPose")->weight =
+      DAM_->get_costs()->get_costs().at("gripperPosition")->weight =
           running_goal_weight_;
     }
   }

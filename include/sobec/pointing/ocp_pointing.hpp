@@ -20,7 +20,6 @@ class OCP_Point {
   ModelMaker modelMaker_;
   DDP ddp_;
 
-  size_t horizon_length_;
   double running_goal_weight_;
   double terminal_goal_weight_;
 
@@ -35,10 +34,10 @@ class OCP_Point {
  public:
   OCP_Point();
 
-  OCP_Point(const OCPSettings_Point &OCPSettings, const ModelMaker &modelMaker,
-            const Eigen::VectorXd x0);
+  OCP_Point(const OCPSettings_Point &OCPSettings, RobotDesigner &designer,
+            const ModelMaker &modelMaker, const Eigen::VectorXd x0);
 
-  void initialize(const OCPSettings_Point &OCPSettings,
+  void initialize(const OCPSettings_Point &OCPSettings, RobotDesigner &designer,
                   const ModelMaker &modelMaker, const Eigen::VectorXd x0);
   bool initialized_ = false;
   void buildSolver(const Eigen::VectorXd x0);
@@ -55,7 +54,7 @@ class OCP_Point {
   Eigen::VectorXd get_torque();
   Eigen::MatrixXd get_gain();
 
-  size_t get_horizonLength() { return (horizon_length_); };
+  size_t get_horizonLength() { return (settings_.horizon_length); };
 };
 
 }  // namespace sobec

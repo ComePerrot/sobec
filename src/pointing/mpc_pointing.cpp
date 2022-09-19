@@ -24,6 +24,9 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
   designer_ = design;
   OCP_ = OCP;
 
+  controlled_joints_id_ = designer_.get_controlledJointsIDs();
+  x_internal_.resize(designer_.get_rModel().nq + designer_.get_rModel().nv);
+
   x0_.resize(designer_.get_rModel().nq + designer_.get_rModel().nv);
   x0_ << shapeState(q0, v0);
   designer_.updateReducedModel(x0_);
@@ -33,7 +36,7 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
   setTarget(tool_se3_target);
 
   // Init OCP
-  OCP_.solve(x0_);
+  // OCP_.solve(x0_);
 
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
