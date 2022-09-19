@@ -80,140 +80,93 @@ void OCP_Point::recede() {
 }
 void OCP_Point::changeTarget(const size_t index,
                              const Eigen::Ref<const Eigen::Vector3d> position) {
-  if (index == settings_.horizon_length) {
-    IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-        ddp_->get_problem()->get_terminalModel());
-  } else {
-    IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-        ddp_->get_problem()->get_runningModels()[index]);
-  }
-  DAM_ = boost::static_pointer_cast<
-      crocoddyl::DifferentialActionModelContactFwdDynamics>(
-      IAM_->get_differential());
-  frameTranslationResidual_ =
-      boost::static_pointer_cast<crocoddyl::ResidualModelFrameTranslation>(
-          DAM_->get_costs()
-              ->get_costs()
-              .at("gripperPosition")
-              ->cost->get_residual());
-
-  frameTranslationResidual_->set_reference(position);
+  boost::static_pointer_cast<crocoddyl::ResidualModelFrameTranslation>(
+      costs(index)->get_costs().at("gripperPosition")->cost->get_residual())
+      ->set_reference(position);
 }
 void OCP_Point::setBalancingTorques() {
   for (size_t modelIndex = 0; modelIndex < settings_.horizon_length;
        modelIndex++) {
-    if (modelIndex == settings_.horizon_length) {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_terminalModel());
-    } else {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_runningModels()[modelIndex]);
-    }
-    DAM_ = boost::static_pointer_cast<
-        crocoddyl::DifferentialActionModelContactFwdDynamics>(
-        IAM_->get_differential());
-
-    boost::shared_ptr<crocoddyl::ResidualModelState> stateResidual_ =
+    Eigen::VectorXd x_ref =
         boost::static_pointer_cast<crocoddyl::ResidualModelState>(
-            DAM_->get_costs()
+            costs(modelIndex)
                 ->get_costs()
                 .at("postureTask")
-                ->cost->get_residual());
-    Eigen::VectorXd x = stateResidual_->get_reference();
+                ->cost->get_residual())
+            ->get_reference();
 
-    boost::shared_ptr<crocoddyl::ResidualModelControl> actuationResidual_ =
-        boost::static_pointer_cast<crocoddyl::ResidualModelControl>(
-            DAM_->get_costs()
-                ->get_costs()
-                .at("actuationTask")
-                ->cost->get_residual());
+    Eigen::VectorXd balancingTorque;
+    balancingTorque.resize((long) iam(modelIndex)->get_nu());
+    iam(modelIndex)->quasiStatic(ada(modelIndex), balancingTorque, x_ref);
 
-    actuationResidual_->set_reference(x);
+    boost::static_pointer_cast<crocoddyl::ResidualModelControl>(
+        costs(modelIndex)
+            ->get_costs()
+            .at("actuationTask")
+            ->cost->get_residual())
+        ->set_reference(balancingTorque);
   }
 }
 void OCP_Point::updateGoalPosition(
     const Eigen::Ref<const Eigen::Vector3d> position) {
   for (size_t modelIndex = 0; modelIndex < settings_.horizon_length;
        modelIndex++) {
-    if (modelIndex == settings_.horizon_length) {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_terminalModel());
-    } else {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_runningModels()[modelIndex]);
-    }
-    DAM_ = boost::static_pointer_cast<
-        crocoddyl::DifferentialActionModelContactFwdDynamics>(
-        IAM_->get_differential());
-    frameTranslationResidual_ =
-        boost::static_pointer_cast<crocoddyl::ResidualModelFrameTranslation>(
-            DAM_->get_costs()
-                ->get_costs()
-                .at("gripperPosition")
-                ->cost->get_residual());
-
-    frameTranslationResidual_->set_reference(position);
+    boost::static_pointer_cast<crocoddyl::ResidualModelFrameTranslation>(
+        costs(modelIndex)
+            ->get_costs()
+            .at("gripperPosition")
+            ->cost->get_residual())
+        ->set_reference(position);
   }
 }
 void OCP_Point::updateGoalRotation(
     const Eigen::Ref<const Eigen::Matrix3d> rotation) {
   for (size_t modelIndex = 0; modelIndex < settings_.horizon_length;
        modelIndex++) {
-    if (modelIndex == settings_.horizon_length) {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_terminalModel());
-    } else {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_runningModels()[modelIndex]);
-    }
-    DAM_ = boost::static_pointer_cast<
-        crocoddyl::DifferentialActionModelContactFwdDynamics>(
-        IAM_->get_differential());
-    frameRotationResidual_ =
-        boost::static_pointer_cast<crocoddyl::ResidualModelFrameRotation>(
-            DAM_->get_costs()
-                ->get_costs()
-                .at("gripperRotation")
-                ->cost->get_residual());
-
-    frameRotationResidual_->set_reference(rotation);
+    boost::static_pointer_cast<crocoddyl::ResidualModelFrameRotation>(
+        costs(modelIndex)
+            ->get_costs()
+            .at("gripperRotation")
+            ->cost->get_residual())
+        ->set_reference(rotation);
   }
 }
 void OCP_Point::changeGoalCostActivation(const size_t index, const bool value) {
-  if (index == settings_.horizon_length) {
-    IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-        ddp_->get_problem()->get_terminalModel());
-  } else {
-    IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-        ddp_->get_problem()->get_runningModels()[index]);
-  }
-  DAM_ = boost::static_pointer_cast<
-      crocoddyl::DifferentialActionModelContactFwdDynamics>(
-      IAM_->get_differential());
-  DAM_->get_costs()->get_costs().at("gripperPosition")->active = value;
-  DAM_->get_costs()->get_costs().at("gripperRotation")->active = value;
+  costs(index)->get_costs().at("gripperPosition")->active = value;
+  costs(index)->get_costs().at("gripperRotation")->active = value;
 }
-void OCP_Point::changeGoaleTrackingWeights() {
+void OCP_Point::changeGoaleTrackingWeights(double weight) {
   for (size_t modelIndex = 0; modelIndex < settings_.horizon_length;
        modelIndex++) {
-    if (modelIndex == settings_.horizon_length) {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_terminalModel());
-      DAM_ = boost::static_pointer_cast<
-          crocoddyl::DifferentialActionModelContactFwdDynamics>(
-          IAM_->get_differential());
-      DAM_->get_costs()->get_costs().at("gripperPosition")->weight =
-          terminal_goal_weight_;
-    } else {
-      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
-          ddp_->get_problem()->get_runningModels()[modelIndex]);
-      DAM_ = boost::static_pointer_cast<
-          crocoddyl::DifferentialActionModelContactFwdDynamics>(
-          IAM_->get_differential());
-      DAM_->get_costs()->get_costs().at("gripperPosition")->weight =
-          running_goal_weight_;
-    }
+    costs(modelIndex)->get_costs().at("gripperPosition")->weight = weight;
   }
+}
+
+AMA OCP_Point::ama(const unsigned long time) {
+  if (time == settings_.horizon_length) {
+    return ddp_->get_problem()->get_terminalModel();
+  } else {
+    return ddp_->get_problem()->get_runningModels()[time];
+  }
+}
+
+IAM OCP_Point::iam(const unsigned long time) {
+  return boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
+      ama(time));
+}
+
+DAM OCP_Point::dam(const unsigned long time) {
+  return boost::static_pointer_cast<
+      crocoddyl::DifferentialActionModelContactFwdDynamics>(
+      iam(time)->get_differential());
+}
+
+Cost OCP_Point::costs(const unsigned long time) {
+  return dam(time)->get_costs();
+}
+
+ADA OCP_Point::ada(const unsigned long time) {
+  return ddp_->get_problem()->get_runningDatas()[time];
 }
 
 Eigen::VectorXd OCP_Point::get_torque() { return (ddp_->get_us()[0]); }

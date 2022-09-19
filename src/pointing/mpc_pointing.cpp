@@ -58,6 +58,19 @@ void MPC_Point::iterate(const Eigen::VectorXd &q_current,
   K0_ = OCP_.get_gain();
 }
 
+void MPC_Point::iterate(const Eigen::VectorXd &x0,
+                        pinocchio::SE3 tool_se3_target) {
+  x0_ = x0;
+
+  designer_.updateReducedModel(x0_);
+
+  updateTarget(tool_se3_target);
+  updateOCP();
+  OCP_.solve(x0_);
+  u0_ = OCP_.get_torque();
+  K0_ = OCP_.get_gain();
+}
+
 void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
   // Setup target
   number_holes_ = settings_.holes_offsets.size();
@@ -167,11 +180,10 @@ void MPC_Point::updateOCP() {
       }
       if (settings_.use_gainScheduling == 1 &&
           position_error_ > settings_.tolerance &&
-          running_goal_weight_ < settings_.maxGoalWeight) {
-        running_goal_weight_ += settings_.gainSchedulig_slope;
-        terminal_goal_weight_ += settings_.gainSchedulig_slope;
+          goal_weight_ < settings_.maxGoalWeight) {
+        goal_weight_ += settings_.gainSchedulig_slope;
 
-        OCP_.changeGoaleTrackingWeights();
+        OCP_.changeGoaleTrackingWeights(goal_weight_);
 
         iteration_++;
       } else {
@@ -200,9 +212,8 @@ void MPC_Point::updateOCP() {
       if (iteration_ == 0) {
         std::cout << "Getting out of the hole" << std::endl;
         if (settings_.use_gainScheduling == 1) {
-          running_goal_weight_ = 5;
-          terminal_goal_weight_ = 50;
-          OCP_.changeGoaleTrackingWeights();
+          goal_weight_ = 5;
+          OCP_.changeGoaleTrackingWeights(goal_weight_);
         }
         oMbackwardHole_ =
             list_oMhole_[current_hole_].act(settings_.backwardOffset);
@@ -275,8 +286,8 @@ const Eigen::VectorXd &MPC_Point::shapeState(const Eigen::VectorXd &q,
     int i = 0;
     for (unsigned long jointID : controlled_joints_id_)
       if (jointID > 1) {
-        x_internal_(i + 7) = q(jointID + 5);
-        x_internal_(designer_.get_rModel().nq + i + 6) = v(jointID + 4);
+        x_internal_(i + 7) = q((long)jointID + 5);
+        x_internal_(designer_.get_rModel().nq + i + 6) = v((long)jointID + 4);
         i++;
       }
     return x_internal_;

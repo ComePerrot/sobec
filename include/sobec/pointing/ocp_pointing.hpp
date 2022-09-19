@@ -22,18 +22,9 @@ class OCP_Point {
   ModelMaker modelMaker_;
   DDP ddp_;
 
-  double running_goal_weight_;
-  double terminal_goal_weight_;
-
   // prealocated memory:
   std::vector<Eigen::VectorXd> warm_xs_;
   std::vector<Eigen::VectorXd> warm_us_;
-  boost::shared_ptr<crocoddyl::ResidualModelFrameTranslation>
-      frameTranslationResidual_;
-  boost::shared_ptr<crocoddyl::ResidualModelFrameRotation>
-      frameRotationResidual_;
-  boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> IAM_;
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> DAM_;
 
  public:
   OCP_Point();
@@ -44,6 +35,7 @@ class OCP_Point {
   void initialize(const OCPSettings_Point &OCPSettings, RobotDesigner &designer,
                   const ModelMaker &modelMaker, const Eigen::VectorXd x0);
   bool initialized_ = false;
+
   void buildSolver(const Eigen::VectorXd x0);
 
   void solveFirst(const Eigen::VectorXd x);
@@ -56,7 +48,13 @@ class OCP_Point {
   void updateGoalPosition(const Eigen::Ref<const Eigen::Vector3d> position);
   void updateGoalRotation(const Eigen::Ref<const Eigen::Matrix3d> rotation);
   void changeGoalCostActivation(const size_t index, const bool value);
-  void changeGoaleTrackingWeights();
+  void changeGoaleTrackingWeights(double weight);
+
+  AMA ama(const unsigned long time);
+  IAM iam(const unsigned long time);
+  DAM dam(const unsigned long time);
+  Cost costs(const unsigned long time);
+  ADA ada(const unsigned long time);
 
   Eigen::VectorXd get_torque();
   Eigen::MatrixXd get_gain();

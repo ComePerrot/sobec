@@ -46,8 +46,7 @@ class MPC_Point {
   size_t current_hole_ = 0;
   int drilling_state_ = 0;
   size_t iteration_ = 0;
-  double running_goal_weight_ = 0;
-  double terminal_goal_weight_ = 0;
+  double goal_weight_ = 0;
 
   // Target related variables
   size_t number_holes_;
@@ -81,6 +80,8 @@ class MPC_Point {
                   const RobotDesigner &design, const OCP_Point &OCP,
                   const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
                   pinocchio::SE3 tool_se3_target);
+
+  void iterate(const Eigen::VectorXd &x0, pinocchio::SE3 tool_se3_target);
 
   void iterate(const Eigen::VectorXd &q_current,
                const Eigen::VectorXd &v_current,
