@@ -1,6 +1,8 @@
 #ifndef SOBEC_OCP_P
 #define SOBEC_OCP_P
 
+#include <memory.h>
+
 #include <pinocchio/fwd.hpp>
 
 // include pinocchio first
@@ -44,9 +46,11 @@ class OCP_Point {
   bool initialized_ = false;
   void buildSolver(const Eigen::VectorXd x0);
 
+  void solveFirst(const Eigen::VectorXd x);
   void solve(const Eigen::VectorXd &measured_x);
 
   void recede();
+  void setBalancingTorques();
   void changeTarget(const size_t index,
                     const Eigen::Ref<const Eigen::Vector3d> position);
   void updateGoalPosition(const Eigen::Ref<const Eigen::Vector3d> position);

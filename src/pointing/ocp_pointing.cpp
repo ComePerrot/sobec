@@ -19,19 +19,6 @@ void OCP_Point::initialize(const OCPSettings_Point &OCPSettings,
 
   buildSolver(x0);
 
-  // horizon settings
-  std::vector<Eigen::VectorXd> xs_init;
-  std::vector<Eigen::VectorXd> us_init;
-  Eigen::VectorXd zero_u = Eigen::VectorXd::Zero(designer_.get_rModel().nv - 6);
-
-  for (std::size_t i = 0; i < settings_.horizon_length; i++) {
-    xs_init.push_back(x0);
-    us_init.push_back(zero_u);
-  }
-  xs_init.push_back(x0);
-
-  ddp_->solve(xs_init, us_init, 500, false);
-
   initialized_ = true;
 }
 
@@ -51,6 +38,21 @@ void OCP_Point::buildSolver(const Eigen::VectorXd x0) {
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels,
                                                      terminalModel);
   ddp_ = boost::make_shared<crocoddyl::SolverFDDP>(shooting_problem);
+}
+
+void OCP_Point::solveFirst(const Eigen::VectorXd x) {
+  // horizon settings
+  std::vector<Eigen::VectorXd> xs_init;
+  std::vector<Eigen::VectorXd> us_init;
+  Eigen::VectorXd zero_u = Eigen::VectorXd::Zero(designer_.get_rModel().nv - 6);
+
+  for (std::size_t i = 0; i < settings_.horizon_length; i++) {
+    xs_init.push_back(x);
+    us_init.push_back(zero_u);
+  }
+  xs_init.push_back(x);
+
+  ddp_->solve(xs_init, us_init, 500, false);
 }
 
 void OCP_Point::solve(const Eigen::VectorXd &measured_x) {
@@ -96,6 +98,38 @@ void OCP_Point::changeTarget(const size_t index,
               ->cost->get_residual());
 
   frameTranslationResidual_->set_reference(position);
+}
+void OCP_Point::setBalancingTorques() {
+  for (size_t modelIndex = 0; modelIndex < settings_.horizon_length;
+       modelIndex++) {
+    if (modelIndex == settings_.horizon_length) {
+      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
+          ddp_->get_problem()->get_terminalModel());
+    } else {
+      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
+          ddp_->get_problem()->get_runningModels()[modelIndex]);
+    }
+    DAM_ = boost::static_pointer_cast<
+        crocoddyl::DifferentialActionModelContactFwdDynamics>(
+        IAM_->get_differential());
+
+    boost::shared_ptr<crocoddyl::ResidualModelState> stateResidual_ =
+        boost::static_pointer_cast<crocoddyl::ResidualModelState>(
+            DAM_->get_costs()
+                ->get_costs()
+                .at("postureTask")
+                ->cost->get_residual());
+    Eigen::VectorXd x = stateResidual_->get_reference();
+
+    boost::shared_ptr<crocoddyl::ResidualModelControl> actuationResidual_ =
+        boost::static_pointer_cast<crocoddyl::ResidualModelControl>(
+            DAM_->get_costs()
+                ->get_costs()
+                .at("actuationTask")
+                ->cost->get_residual());
+
+    actuationResidual_->set_reference(x);
+  }
 }
 void OCP_Point::updateGoalPosition(
     const Eigen::Ref<const Eigen::Vector3d> position) {

@@ -34,9 +34,10 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
 
   // Setup target
   setTarget(tool_se3_target);
+  OCP_.setBalancingTorques();
 
   // Init OCP
-  // OCP_.solve(x0_);
+  OCP_.solveFirst(x0_);
 
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
@@ -87,7 +88,7 @@ void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
 
     oMtarget_.rotation() = rotationZ * rotationY;
   }
-  auto a = oMtarget_.rotation();
+
   OCP_.updateGoalPosition(oMtarget_.translation());
   OCP_.updateGoalRotation(oMtarget_.rotation());
 
