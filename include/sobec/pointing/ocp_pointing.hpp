@@ -28,6 +28,8 @@ class OCP_Point {
   std::vector<Eigen::VectorXd> warm_us_;
   boost::shared_ptr<crocoddyl::ResidualModelFrameTranslation>
       frameTranslationResidual_;
+  boost::shared_ptr<crocoddyl::ResidualModelFrameRotation>
+      frameRotationResidual_;
   boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> IAM_;
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> DAM_;
 
@@ -48,6 +50,7 @@ class OCP_Point {
   void changeTarget(const size_t index,
                     const Eigen::Ref<const Eigen::Vector3d> position);
   void updateGoalPosition(const Eigen::Ref<const Eigen::Vector3d> position);
+  void updateGoalRotation(const Eigen::Ref<const Eigen::Matrix3d> rotation);
   void changeGoalCostActivation(const size_t index, const bool value);
   void changeGoaleTrackingWeights();
 

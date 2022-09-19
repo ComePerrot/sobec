@@ -87,6 +87,9 @@ void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
 
     oMtarget_.rotation() = rotationZ * rotationY;
   }
+  auto a = oMtarget_.rotation();
+  OCP_.updateGoalPosition(oMtarget_.translation());
+  OCP_.updateGoalRotation(oMtarget_.rotation());
 
   //  Setup list_oMholes
   setHolesPlacement();

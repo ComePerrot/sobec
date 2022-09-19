@@ -114,6 +114,26 @@ void OCP_Point::updateGoalPosition(
     frameTranslationResidual_->set_reference(position);
   }
 }
+void OCP_Point::updateGoalRotation(
+    const Eigen::Ref<const Eigen::Matrix3d> rotation) {
+  for (size_t modelIndex = 0; modelIndex < settings_.horizon_length; modelIndex++) {
+    if (modelIndex == settings_.horizon_length) {
+      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
+          ddp_->get_problem()->get_terminalModel());
+    } else {
+      IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
+          ddp_->get_problem()->get_runningModels()[modelIndex]);
+    }
+    DAM_ = boost::static_pointer_cast<
+        crocoddyl::DifferentialActionModelContactFwdDynamics>(
+        IAM_->get_differential());
+    frameRotationResidual_ = boost::static_pointer_cast<
+        crocoddyl::ResidualModelFrameRotation>(
+        DAM_->get_costs()->get_costs().at("gripperRotation")->cost->get_residual());
+
+    frameRotationResidual_->set_reference(rotation);
+  }
+}
 void OCP_Point::changeGoalCostActivation(const size_t index, const bool value) {
   if (index == settings_.horizon_length) {
     IAM_ = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
