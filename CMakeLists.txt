@@ -92,8 +92,8 @@ set(${PROJECT_NAME}_HEADERS
     # include/${PROJECT_NAME}/walk-with-traj/ocp.hpp
     include/${PROJECT_NAME}/walk-with-traj/wbc.hpp
     include/${PROJECT_NAME}/walk-with-traj/foot_trajectory.hpp
-    include/${PROJECT_NAME}/pointing/mpc_pointing.hpp
-    include/${PROJECT_NAME}/pointing/ocp_pointing.hpp)
+    include/${PROJECT_NAME}/pointing/mpc-pointing.hpp
+    include/${PROJECT_NAME}/pointing/ocp-pointing.hpp)
 
 set(${PROJECT_NAME}_SOURCES
     src/walk-with-traj/designer.cpp
@@ -110,8 +110,8 @@ set(${PROJECT_NAME}_SOURCES
     src/walk-without-think/ocp-robot.cpp
     src/walk-without-think/ocp-ref-forces.cpp
     src/walk-without-think/mpc-params.cpp
-    src/pointing/mpc_pointing.cpp
-    src/pointing/ocp_pointing.cpp)
+    src/pointing/mpc-pointing.cpp
+    src/pointing/ocp-pointing.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
                                    ${${PROJECT_NAME}_HEADERS})

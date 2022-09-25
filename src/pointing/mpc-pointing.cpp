@@ -1,4 +1,4 @@
-#include "sobec/pointing/mpc_pointing.hpp"
+#include "sobec/pointing/mpc-pointing.hpp"
 
 namespace sobec {
 

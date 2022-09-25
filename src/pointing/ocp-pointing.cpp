@@ -1,4 +1,4 @@
-#include "sobec/pointing/ocp_pointing.hpp"
+#include "sobec/pointing/ocp-pointing.hpp"
 
 namespace sobec {
 OCP_Point::OCP_Point() {}
