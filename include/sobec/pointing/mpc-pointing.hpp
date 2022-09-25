@@ -5,7 +5,7 @@
 
 // include pinocchio first
 
-#include "sobec/pointing/ocp_pointing.hpp"
+#include "sobec/pointing/ocp-pointing.hpp"
 #include "sobec/walk-with-traj/designer.hpp"
 
 namespace sobec {
@@ -36,7 +36,6 @@ class MPC_Point {
   MPCSettings_Point settings_;
   RobotDesigner designer_;
   OCP_Point OCP_;
-  boost::shared_ptr<crocoddyl::SolverFDDP> ddp_;
 
   Eigen::VectorXd x0_;
   Eigen::VectorXd u0_;
@@ -65,27 +64,23 @@ class MPC_Point {
   Eigen::VectorXd x_internal_;
 
  private:
-  void setTarget(pinocchio::SE3 tool_se3_target);
-  void updateTarget(pinocchio::SE3 tool_se3_target);
+  void setTarget(pinocchio::SE3 toolMtarget);
+  void updateTarget(pinocchio::SE3 toolMtarget);
   void updateOCP();
   void setHolesPlacement();
 
  public:
-  MPC_Point();
-  MPC_Point(const MPCSettings_Point &settings, const RobotDesigner &design,
-            const OCP_Point &OCP, const Eigen::VectorXd &q0,
-            const Eigen::VectorXd &v0, pinocchio::SE3 tool_se3_target);
+  MPC_Point(const MPCSettings_Point &settings,
+            const OCPSettings_Point &OCPSettings, const RobotDesigner &design);
 
-  void initialize(const MPCSettings_Point &settings,
-                  const RobotDesigner &design, const OCP_Point &OCP,
-                  const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
-                  pinocchio::SE3 tool_se3_target);
+  void initialize(const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
+                  pinocchio::SE3 toolMtarget);
 
-  void iterate(const Eigen::VectorXd &x0, pinocchio::SE3 tool_se3_target);
+  void iterate(const Eigen::VectorXd &x0, pinocchio::SE3 toolMtarget);
 
   void iterate(const Eigen::VectorXd &q_current,
                const Eigen::VectorXd &v_current,
-               pinocchio::SE3 tool_se3_target);
+               pinocchio::SE3 toolMtarget);
 
   const Eigen::VectorXd &shapeState(const Eigen::VectorXd &q,
                                     const Eigen::VectorXd &v);

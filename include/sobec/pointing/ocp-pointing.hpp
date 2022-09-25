@@ -13,6 +13,7 @@
 namespace sobec {
 struct OCPSettings_Point {
   size_t horizon_length;
+  ModelMakerSettings modelMakerSettings;
 };
 
 class OCP_Point {
@@ -20,27 +21,33 @@ class OCP_Point {
   OCPSettings_Point settings_;
   RobotDesigner designer_;
   ModelMaker modelMaker_;
-  DDP ddp_;
+  DDP solver_;
+
+  bool initialized_ = false;
 
   // prealocated memory:
   std::vector<Eigen::VectorXd> warm_xs_;
   std::vector<Eigen::VectorXd> warm_us_;
 
- public:
-  OCP_Point();
-
-  OCP_Point(const OCPSettings_Point &OCPSettings, RobotDesigner &designer,
-            const ModelMaker &modelMaker, const Eigen::VectorXd x0);
-
-  void initialize(const OCPSettings_Point &OCPSettings, RobotDesigner &designer,
-                  const ModelMaker &modelMaker, const Eigen::VectorXd x0);
-  bool initialized_ = false;
-
-  void buildSolver(const Eigen::VectorXd x0);
-
+  // OCP Problem Maker private functions
+  void buildSolver(const Eigen::VectorXd x0, pinocchio::SE3 oMtarget,
+                   const ModelMakerSettings modelMakerSettings);
   void solveFirst(const Eigen::VectorXd x);
+
+  // OCP Problem Helper private functions
+  AMA ama(const unsigned long time);
+  IAM iam(const unsigned long time);
+  DAM dam(const unsigned long time);
+  Cost costs(const unsigned long time);
+  ADA ada(const unsigned long time);
+
+ public:
+  OCP_Point(const OCPSettings_Point &OCPSettings, RobotDesigner &designer);
+
+  void initialize(const Eigen::VectorXd x0, pinocchio::SE3 oMtarget);
   void solve(const Eigen::VectorXd &measured_x);
 
+  // OCP Problem Helper public functions
   void recede();
   void setBalancingTorques();
   void changeTarget(const size_t index,
@@ -50,15 +57,12 @@ class OCP_Point {
   void changeGoalCostActivation(const size_t index, const bool value);
   void changeGoaleTrackingWeights(double weight);
 
-  AMA ama(const unsigned long time);
-  IAM iam(const unsigned long time);
-  DAM dam(const unsigned long time);
-  Cost costs(const unsigned long time);
-  ADA ada(const unsigned long time);
+  // Setters and Getters
 
   Eigen::VectorXd get_torque();
   Eigen::MatrixXd get_gain();
 
+  size_t get_initialize() { return (initialized_); };
   size_t get_horizonLength() { return (settings_.horizon_length); };
 };
 

@@ -4,26 +4,13 @@ namespace sobec {
 
 #define PI 3.14159265
 
-MPC_Point::MPC_Point() {}
-
 MPC_Point::MPC_Point(const MPCSettings_Point &settings,
-                     const RobotDesigner &design, const OCP_Point &OCP,
-                     const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
-                     pinocchio::SE3 tool_se3_target) {
-  initialize(settings, design, OCP, q0, v0, tool_se3_target);
-}
+                     const OCPSettings_Point &OCPSettings,
+                     const RobotDesigner &design)
+    : settings_(settings), designer_(design), OCP_(OCPSettings, designer_) {}
 
-void MPC_Point::initialize(const MPCSettings_Point &settings,
-                           const RobotDesigner &design, const OCP_Point &OCP,
-                           const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
-                           pinocchio::SE3 tool_se3_target) {
-  if (!design.initialized_ || !OCP.initialized_) {
-    throw std::runtime_error("The designer and OCP must be initialized.");
-  }
-  settings_ = settings;
-  designer_ = design;
-  OCP_ = OCP;
-
+void MPC_Point::initialize(const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
+                           pinocchio::SE3 toolMtarget) {
   controlled_joints_id_ = designer_.get_controlledJointsIDs();
   x_internal_.resize(designer_.get_rModel().nq + designer_.get_rModel().nv);
 
@@ -33,52 +20,50 @@ void MPC_Point::initialize(const MPCSettings_Point &settings,
   designer_.updateCompleteModel(q0);
 
   // Setup target
-  setTarget(tool_se3_target);
-  OCP_.setBalancingTorques();
+  setTarget(toolMtarget);
 
   // Init OCP
-  OCP_.solveFirst(x0_);
-
+  OCP_.initialize(x0_, oMtarget_);
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
+
   initialized_ = true;
 }
 
 void MPC_Point::iterate(const Eigen::VectorXd &q_current,
                         const Eigen::VectorXd &v_current,
-                        pinocchio::SE3 tool_se3_target) {
+                        pinocchio::SE3 toolMtarget) {
   x0_ = shapeState(q_current, v_current);
 
   designer_.updateReducedModel(x0_);
 
-  updateTarget(tool_se3_target);
+  updateTarget(toolMtarget);
   updateOCP();
   OCP_.solve(x0_);
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
 }
 
-void MPC_Point::iterate(const Eigen::VectorXd &x0,
-                        pinocchio::SE3 tool_se3_target) {
+void MPC_Point::iterate(const Eigen::VectorXd &x0, pinocchio::SE3 toolMtarget) {
   x0_ = x0;
 
   designer_.updateReducedModel(x0_);
 
-  updateTarget(tool_se3_target);
+  updateTarget(toolMtarget);
   updateOCP();
   OCP_.solve(x0_);
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
 }
 
-void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
+void MPC_Point::setTarget(pinocchio::SE3 toolMtarget) {
   // Setup target
   number_holes_ = settings_.holes_offsets.size();
 
   //  Define oMtarget
   if (settings_.use_mocap == 1 || settings_.use_mocap == 2) {
     tool_se3_hole_ =
-        tool_se3_target.act(settings_.holes_offsets[current_hole_]);
+        toolMtarget.act(settings_.holes_offsets[current_hole_]);
     oMtarget_ = designer_.get_EndEff_frame().act(tool_se3_hole_);
   } else {
     oMtarget_.translation() = settings_.targetPos;
@@ -102,21 +87,18 @@ void MPC_Point::setTarget(pinocchio::SE3 tool_se3_target) {
     oMtarget_.rotation() = rotationZ * rotationY;
   }
 
-  OCP_.updateGoalPosition(oMtarget_.translation());
-  OCP_.updateGoalRotation(oMtarget_.rotation());
-
   //  Setup list_oMholes
   setHolesPlacement();
 }
 
-void MPC_Point::updateTarget(pinocchio::SE3 tool_se3_target) {
+void MPC_Point::updateTarget(pinocchio::SE3 toolMtarget) {
   if (settings_.use_mocap == 0 || settings_.use_mocap == 1) {
     tool_se3_hole_ =
         designer_.get_EndEff_frame().actInv(list_oMhole_[current_hole_]);
     position_error_ = tool_se3_hole_.translation().norm();
   } else if (settings_.use_mocap == 2) {
     tool_se3_hole_ =
-        tool_se3_target.act(settings_.holes_offsets[current_hole_]);
+        toolMtarget.act(settings_.holes_offsets[current_hole_]);
 
     position_error_ = tool_se3_hole_.translation().norm();
 
