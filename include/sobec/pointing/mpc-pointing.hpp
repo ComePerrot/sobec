@@ -26,9 +26,12 @@ struct MPCSettings_Point {
 
   // Target
   Eigen::Vector3d targetPos;
-  std::vector<pinocchio::SE3> holes_offsets;
-  pinocchio::SE3 backwardOffset;
+  std::vector<Eigen::Vector3d> holes_offsets;
+  double backwardOffset;
   double tolerance;
+
+  void readParamsFromYamlString(std::string& StringToParse);
+  void readParamsFromYamlFile(const std::string& Filename);
 };
 
 class MPC_Point {
@@ -49,8 +52,10 @@ class MPC_Point {
 
   // Target related variables
   size_t number_holes_;
+  std::vector<pinocchio::SE3> holes_offsets_;
   std::vector<pinocchio::SE3>
       list_oMhole_;  // Holes position in the robot frame
+  pinocchio::SE3 backwardOffset_ = pinocchio::SE3::Identity();
 
   // Security management
   bool initialized_ = false;

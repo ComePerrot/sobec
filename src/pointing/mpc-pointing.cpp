@@ -7,7 +7,13 @@ namespace sobec {
 MPC_Point::MPC_Point(const MPCSettings_Point &settings,
                      const OCPSettings_Point &OCPSettings,
                      const RobotDesigner &design)
-    : settings_(settings), designer_(design), OCP_(OCPSettings, designer_) {}
+    : settings_(settings), designer_(design), OCP_(OCPSettings, designer_) {
+  backwardOffset_.translation().z() = settings_.backwardOffset;
+  for (auto offset : settings_.holes_offsets) {
+    holes_offsets_.push_back(
+        pinocchio::SE3(Eigen::Matrix3d::Identity(), offset));
+  }
+}
 
 void MPC_Point::initialize(const Eigen::VectorXd &q0, const Eigen::VectorXd &v0,
                            pinocchio::SE3 toolMtarget) {
@@ -62,8 +68,7 @@ void MPC_Point::setTarget(pinocchio::SE3 toolMtarget) {
 
   //  Define oMtarget
   if (settings_.use_mocap == 1 || settings_.use_mocap == 2) {
-    tool_se3_hole_ =
-        toolMtarget.act(settings_.holes_offsets[current_hole_]);
+    tool_se3_hole_ = toolMtarget.act(holes_offsets_[current_hole_]);
     oMtarget_ = designer_.get_EndEff_frame().act(tool_se3_hole_);
   } else {
     oMtarget_.translation() = settings_.targetPos;
@@ -97,8 +102,7 @@ void MPC_Point::updateTarget(pinocchio::SE3 toolMtarget) {
         designer_.get_EndEff_frame().actInv(list_oMhole_[current_hole_]);
     position_error_ = tool_se3_hole_.translation().norm();
   } else if (settings_.use_mocap == 2) {
-    tool_se3_hole_ =
-        toolMtarget.act(settings_.holes_offsets[current_hole_]);
+    tool_se3_hole_ = toolMtarget.act(holes_offsets_[current_hole_]);
 
     position_error_ = tool_se3_hole_.translation().norm();
 
@@ -197,8 +201,7 @@ void MPC_Point::updateOCP() {
           goal_weight_ = 5;
           OCP_.changeGoaleTrackingWeights(goal_weight_);
         }
-        oMbackwardHole_ =
-            list_oMhole_[current_hole_].act(settings_.backwardOffset);
+        oMbackwardHole_ = list_oMhole_[current_hole_].act(backwardOffset_);
       }
       if (iteration_ <= OCP_.get_horizonLength()) {
         OCP_.changeTarget(OCP_.get_horizonLength() - iteration_,
@@ -249,11 +252,11 @@ void MPC_Point::updateOCP() {
 void MPC_Point::setHolesPlacement() {
   if (list_oMhole_.empty()) {
     for (size_t h = 0; h < number_holes_; h++) {
-      list_oMhole_.push_back(oMtarget_.act(settings_.holes_offsets[h]));
+      list_oMhole_.push_back(oMtarget_.act(holes_offsets_[h]));
     }
   } else {
     for (size_t h = 0; h < number_holes_; h++) {
-      list_oMhole_[h] = oMtarget_.act(settings_.holes_offsets[h]);
+      list_oMhole_[h] = oMtarget_.act(holes_offsets_[h]);
     }
   }
 }

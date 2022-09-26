@@ -14,6 +14,9 @@ namespace sobec {
 struct OCPSettings_Point {
   size_t horizon_length;
   ModelMakerSettings modelMakerSettings;
+
+  void readParamsFromYamlString(std::string& StringToParse);
+  void readParamsFromYamlFile(const std::string& Filename);
 };
 
 class OCP_Point {
