@@ -111,7 +111,11 @@ set(${PROJECT_NAME}_SOURCES
     src/walk-without-think/ocp-ref-forces.cpp
     src/walk-without-think/mpc-params.cpp
     src/pointing/mpc-pointing.cpp
-    src/pointing/ocp-pointing.cpp)
+    src/pointing/mpc-params.cpp
+    src/pointing/ocp-pointing.cpp
+    src/pointing/ocp-params.cpp
+    src/pointing/ocp-problem-helper.cpp
+    src/pointing/ocp-problem-maker.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
                                    ${${PROJECT_NAME}_HEADERS})

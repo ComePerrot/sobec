@@ -6,7 +6,7 @@ namespace sobec {
 
 void OCPSettings_Point::readParamsFromYamlString(std::string &StringToParse) {
   YAML::Node root = YAML::Load(StringToParse);
-  YAML::Node config = root["point"];
+  YAML::Node config = root["ocp-point"];
 
   if (!config) {
     std::cerr << "No point section." << std::endl;

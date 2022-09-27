@@ -57,7 +57,9 @@ void MPC_Point::iterate(const Eigen::VectorXd &x0, pinocchio::SE3 toolMtarget) {
 
   updateTarget(toolMtarget);
   updateOCP();
+
   OCP_.solve(x0_);
+
   u0_ = OCP_.get_torque();
   K0_ = OCP_.get_gain();
 }
@@ -94,6 +96,18 @@ void MPC_Point::setTarget(pinocchio::SE3 toolMtarget) {
 
   //  Setup list_oMholes
   setHolesPlacement();
+}
+
+void MPC_Point::setHolesPlacement() {
+  if (list_oMhole_.empty()) {
+    for (size_t h = 0; h < number_holes_; h++) {
+      list_oMhole_.push_back(oMtarget_.act(holes_offsets_[h]));
+    }
+  } else {
+    for (size_t h = 0; h < number_holes_; h++) {
+      list_oMhole_[h] = oMtarget_.act(holes_offsets_[h]);
+    }
+  }
 }
 
 void MPC_Point::updateTarget(pinocchio::SE3 toolMtarget) {
@@ -217,7 +231,8 @@ void MPC_Point::updateOCP() {
       if (iteration_ == 0) {
         if (current_hole_ < (number_holes_ - 1)) {
           current_hole_++;
-          std::cout << "Switching to target:" << current_hole_ + 1 << std::endl;
+          std::cout << "Switching to target: " << current_hole_ + 1
+                    << std::endl;
           iteration_++;
         } else {
           std::cout << "Going back to inital position" << std::endl;
@@ -246,18 +261,6 @@ void MPC_Point::updateOCP() {
         drilling_state_++;
       }
       break;
-  }
-}
-
-void MPC_Point::setHolesPlacement() {
-  if (list_oMhole_.empty()) {
-    for (size_t h = 0; h < number_holes_; h++) {
-      list_oMhole_.push_back(oMtarget_.act(holes_offsets_[h]));
-    }
-  } else {
-    for (size_t h = 0; h < number_holes_; h++) {
-      list_oMhole_[h] = oMtarget_.act(holes_offsets_[h]);
-    }
   }
 }
 

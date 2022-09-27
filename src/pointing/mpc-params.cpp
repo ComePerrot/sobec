@@ -6,7 +6,7 @@ namespace sobec {
 
 void MPCSettings_Point::readParamsFromYamlString(std::string &StringToParse) {
   YAML::Node root = YAML::Load(StringToParse);
-  YAML::Node config = root["point"];
+  YAML::Node config = root["mpc-point"];
 
   if (!config) {
     std::cerr << "No point section." << std::endl;
@@ -62,7 +62,14 @@ void MPCSettings_Point::readParamsFromYamlString(std::string &StringToParse) {
                               std::string fieldname) {
     YAML::Node yn_astdvect_v3d = config[fieldname];
     if (yn_astdvect_v3d) {
-      aref_stdvect_v3d = yn_astdvect_v3d.as<std::vector<Eigen::Vector3d>>();
+      for (std::size_t i = 0; i < yn_astdvect_v3d.size(); i++) {
+        Eigen::Vector3d buffer;
+        for (std::size_t j = 0; j < 3; j++) {
+          buffer[(Eigen::Index)j] =
+              yn_astdvect_v3d[i][j].as<double>();
+        }
+        aref_stdvect_v3d.push_back(buffer);
+      }
     } else {
       std::cout << "No " << fieldname << std::endl;
     }
