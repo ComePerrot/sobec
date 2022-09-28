@@ -73,6 +73,7 @@ void exposeDesigner() {
       .def("initialize", &initialize)
       .def("updateReducedModel", &RobotDesigner::updateReducedModel)
       .def("updateCompleteModel", &RobotDesigner::updateCompleteModel)
+      .def("addEndEffectorFrame", &RobotDesigner::addEndEffectorFrame)
       .def("get_LF_frame",
            bp::make_function(
                &RobotDesigner::get_LF_frame,
@@ -80,6 +81,10 @@ void exposeDesigner() {
       .def("get_RF_frame",
            bp::make_function(
                &RobotDesigner::get_RF_frame,
+               bp::return_value_policy<bp::reference_existing_object>()))
+      .def("get_EndEff_frame",
+           bp::make_function(
+               &RobotDesigner::get_EndEff_frame,
                bp::return_value_policy<bp::reference_existing_object>()))
       .def("getRobotMass", &RobotDesigner::getRobotMass)
       .def("get_rModel",
@@ -133,6 +138,10 @@ void exposeDesigner() {
       .def("get_RF_id",
            bp::make_function(
                &RobotDesigner::get_RF_id,
+               bp::return_value_policy<bp::copy_const_reference>()))
+      .def("get_EndEff_id",
+           bp::make_function(
+               &RobotDesigner::get_EndEff_id,
                bp::return_value_policy<bp::copy_const_reference>()))
       .def("get_settings",
            bp::make_function(

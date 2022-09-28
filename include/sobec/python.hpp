@@ -25,6 +25,8 @@ void exposeWBC();
 void exposeFlex();
 void exposeOCPWalk();
 void exposeMPCWalk();
+void exposeOCPPoint();
+void exposeMPCPoint();
 
 }  // namespace python
 }  // namespace sobec

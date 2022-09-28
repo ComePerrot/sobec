@@ -45,9 +45,9 @@ class OCP_Point {
   ADA ada(const unsigned long time);
 
  public:
-  OCP_Point(const OCPSettings_Point &OCPSettings, RobotDesigner &designer);
+  OCP_Point(const OCPSettings_Point &OCPSettings, const RobotDesigner &designer);
 
-  void initialize(const Eigen::VectorXd x0, pinocchio::SE3 oMtarget);
+  void initialize(const Eigen::VectorXd &x0, const pinocchio::SE3 &oMtarget);
   void solve(const Eigen::VectorXd &measured_x);
 
   // OCP Problem Helper public functions
@@ -65,7 +65,7 @@ class OCP_Point {
   Eigen::VectorXd get_torque();
   Eigen::MatrixXd get_gain();
 
-  size_t get_initialize() { return (initialized_); };
+  size_t get_initialized() { return (initialized_); };
   size_t get_horizonLength() { return (settings_.horizon_length); };
 };
 

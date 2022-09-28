@@ -2,10 +2,10 @@
 
 namespace sobec {
 OCP_Point::OCP_Point(const OCPSettings_Point &OCPSettings,
-                     RobotDesigner &designer)
+                     const RobotDesigner &designer)
     : settings_(OCPSettings), designer_(designer) {}
 
-void OCP_Point::initialize(const Eigen::VectorXd x0, pinocchio::SE3 oMtarget) {
+void OCP_Point::initialize(const Eigen::VectorXd &x0, const pinocchio::SE3 &oMtarget) {
   if (!designer_.initialized_) {
     throw std::runtime_error("The designer must be initialized.");
   }

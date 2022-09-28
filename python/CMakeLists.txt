@@ -21,7 +21,9 @@ set(${PY_NAME}_SOURCES
     walk-with-traj/model_factory.cpp
     walk-with-traj/wbc.cpp
     walk-without-think/ocp.cpp
-    walk-without-think/mpc.cpp)
+    walk-without-think/mpc.cpp
+    pointing/ocp.cpp
+    pointing/mpc.cpp)
 
 add_library(${PY_NAME}_pywrap SHARED ${${PY_NAME}_SOURCES})
 target_link_libraries(${PY_NAME}_pywrap PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
