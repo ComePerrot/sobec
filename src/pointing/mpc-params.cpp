@@ -9,7 +9,7 @@ void MPCSettings_Point::readParamsFromYamlString(std::string &StringToParse) {
   YAML::Node config = root["mpc-point"];
 
   if (!config) {
-    std::cerr << "No point section." << std::endl;
+    std::cerr << "No mpc-point section." << std::endl;
     return;
   }
 

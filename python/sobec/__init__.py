@@ -27,6 +27,10 @@ from .sobec_pywrap import (
     Flex,
     computeWeightShareSmoothProfile,
     LocomotionType,
+    OCPSettings_Point,
+    OCP_Point,
+    MPCSettings_Point,
+    MPC_Point
 )
 
 from .repr_ocp import reprProblem

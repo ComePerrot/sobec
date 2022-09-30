@@ -9,7 +9,7 @@ void OCPSettings_Point::readParamsFromYamlString(std::string &StringToParse) {
   YAML::Node config = root["ocp-point"];
 
   if (!config) {
-    std::cerr << "No point section." << std::endl;
+    std::cerr << "No ocp-point section." << std::endl;
     return;
   }
 
