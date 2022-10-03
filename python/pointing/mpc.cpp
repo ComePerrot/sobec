@@ -65,17 +65,17 @@ void exposeMPCPointParams() {
 
 void exposeMPCPointClass() {
   bp::register_ptr_to_python<boost::shared_ptr<MPC_Point> >();
-
+  typedef Eigen::Ref<const Eigen::VectorXd> ConstVectorRef;
   bp::class_<MPC_Point>(
       "MPC_Point", bp::init<const MPCSettings_Point&, const OCPSettings_Point&,
                             const RobotDesigner&>(
                        bp::args("self", "settings", "OCPSettings", "design"),
                        "Initialize the MPC (empty init)"))
-      .def<void (MPC_Point::*)(const Eigen::VectorXd&, const Eigen::VectorXd&,
+      .def<void (MPC_Point::*)(const ConstVectorRef&, const ConstVectorRef&,
                                const pinocchio::SE3)>(
           "initialize", &MPC_Point::initialize,
           bp::args("self", "q0", "v0", "toolMtarget"))
-      .def<void (MPC_Point::*)(const Eigen::VectorXd&, const Eigen::VectorXd&,
+      .def<void (MPC_Point::*)(const ConstVectorRef&, const ConstVectorRef&,
                                const pinocchio::SE3)>(
           "iterate", &MPC_Point::iterate,
           bp::args("self", "q0", "v0", "toolMtarget"))
