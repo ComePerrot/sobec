@@ -136,30 +136,34 @@ void defineFeetTracking(ModelMaker &self,
 }
 
 void definePostureTask(ModelMaker &self,
-                       crocoddyl::CostModelSum &costCollector) {
+                       crocoddyl::CostModelSum &costCollector,
+                       const double wStateReg) {
   Cost costs = boost::make_shared<crocoddyl::CostModelSum>(costCollector);
-  self.definePostureTask(costs);
+  self.definePostureTask(costs, wStateReg);
   costCollector = *costs;
 }
 
 void defineActuationTask(ModelMaker &self,
-                         crocoddyl::CostModelSum &costCollector) {
+                         crocoddyl::CostModelSum &costCollector,
+                         const double wControlReg) {
   Cost costs = boost::make_shared<crocoddyl::CostModelSum>(costCollector);
-  self.defineActuationTask(costs);
+  self.defineActuationTask(costs, wControlReg);
   costCollector = *costs;
 }
 
 void defineJointLimits(ModelMaker &self,
-                       crocoddyl::CostModelSum &costCollector) {
+                       crocoddyl::CostModelSum &costCollector,
+                       const double wLimit) {
   Cost costs = boost::make_shared<crocoddyl::CostModelSum>(costCollector);
-  self.defineJointLimits(costs);
+  self.defineJointLimits(costs, wLimit);
   costCollector = *costs;
 }
 
 void defineCoMVelocity(ModelMaker &self,
-                       crocoddyl::CostModelSum &costCollector) {
+                       crocoddyl::CostModelSum &costCollector,
+                       const double wVCoM) {
   Cost costs = boost::make_shared<crocoddyl::CostModelSum>(costCollector);
-  self.defineCoMVelocity(costs);
+  self.defineCoMVelocity(costs, wVCoM);
   costCollector = *costs;
 }
 
