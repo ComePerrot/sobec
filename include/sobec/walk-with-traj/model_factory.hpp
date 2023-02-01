@@ -74,7 +74,8 @@ class ModelMaker {
 
   AMA formulateStepTracker(const Support &support = Support::DOUBLE);
   AMA formulate_stair_climber(const Support &support = Support::DOUBLE);
-  AMA formulatePointingTask();
+  AMA formulateRunningPointingTask();
+  AMA formulateTerminalPointingTask();
 
   std::vector<AMA> formulateHorizon(const std::vector<Support> &supports);
   std::vector<AMA> formulateHorizon(const int &T);

@@ -318,7 +318,7 @@ AMA ModelMaker::formulateStepTracker(const Support &support) {
   return runningModel;
 }
 
-AMA ModelMaker::formulatePointingTask() {
+AMA ModelMaker::formulateRunningPointingTask() {
   Contact contacts = boost::make_shared<crocoddyl::ContactModelMultiple>(
       state_, actuation_->get_nu());
   Cost costs =
@@ -326,12 +326,19 @@ AMA ModelMaker::formulatePointingTask() {
 
   defineFeetContact(contacts, Support::DOUBLE);
 
-  defineFeetWrenchCost(costs, Support::DOUBLE);
-  definePostureTask(costs);
-  defineActuationTask(costs);
+  // Safety constraints
   defineJointLimits(costs);
+
+  // Equilibrium constraints
   defineCoMPosition(costs);
   defineCoMVelocity(costs);
+  defineFeetWrenchCost(costs, Support::DOUBLE);
+
+  // Regulation task
+  definePostureTask(costs);
+  defineActuationTask(costs);
+  
+  // End effector task
   defineGripperPlacement(costs);
   defineGripperVelocity(costs);
 
@@ -340,6 +347,35 @@ AMA ModelMaker::formulatePointingTask() {
           state_, actuation_, contacts, costs, 0., true);
   AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
       runningDAM, settings_.timeStep);
+
+  return runningModel;
+}
+
+AMA ModelMaker::formulateTerminalPointingTask() {
+  Contact contacts = boost::make_shared<crocoddyl::ContactModelMultiple>(
+      state_, actuation_->get_nu());
+  Cost costs =
+      boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
+
+  // Safety constraints
+  defineJointLimits(costs);
+
+  // Equilibrium constraints
+  defineCoMPosition(costs);
+  defineCoMVelocity(costs);
+
+  // Regulation task
+  definePostureTask(costs);
+  
+  // End effector task
+  defineGripperPlacement(costs);
+  defineGripperVelocity(costs);
+
+  DAM runningDAM =
+      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
+          state_, actuation_, contacts, costs, 0., true);
+  AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
+      runningDAM, 0);
 
   return runningModel;
 }
