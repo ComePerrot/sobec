@@ -84,18 +84,19 @@ class ModelMaker {
   // formulation parts:
   void defineFeetContact(Contact &contactCollector,
                          const Support &support = Support::DOUBLE);
-  void defineFeetWrenchCost(Cost &costCollector,
+  void defineFeetWrenchCost(Cost &costCollector, const double wWrenchCone,
                             const Support &support = Support::DOUBLE);
   void defineFeetTracking(Cost &costCollector);
-  void definePostureTask(Cost &costCollector);
-  void defineActuationTask(Cost &costCollector);
-  void defineJointLimits(Cost &costCollector);
-  void defineCoMPosition(Cost &costCollector);
-  void defineCoMVelocity(Cost &costCollector);
+  void definePostureTask(Cost &costCollector, const double wStateReg);
+  void defineActuationTask(Cost &costCollector, const double wControlReg);
+  void defineJointLimits(Cost &costCollector, const double wLimit);
+  void defineCoMPosition(Cost &costCollector, const double wPCoM);
+  void defineCoMVelocity(Cost &costCollector, const double wVCoM);
   void defineCoPTask(Cost &costCollector,
                      const Support &support = Support::DOUBLE);
-  void defineGripperPlacement(Cost &costCollector);
-  void defineGripperVelocity(Cost &costCollector);
+  void defineGripperPlacement(Cost &costCollector, const double wGripperPos,
+                              const double wGripperRot);
+  void defineGripperVelocity(Cost &costCollector, const double wGripperVel);
 
   boost::shared_ptr<crocoddyl::StateMultibody> getState() { return state_; }
   void setState(const boost::shared_ptr<crocoddyl::StateMultibody> &new_state) {

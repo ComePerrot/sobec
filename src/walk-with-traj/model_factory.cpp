@@ -55,6 +55,7 @@ void ModelMaker::defineFeetContact(Contact &contactCollector,
 }
 
 void ModelMaker::defineFeetWrenchCost(Cost &costCollector,
+                                      const double wWrenchCone,
                                       const Support &support) {
   double Mg = -designer_.getRobotMass() * settings_.gravity(2);
   double Fz_ref;
@@ -105,10 +106,8 @@ void ModelMaker::defineFeetWrenchCost(Cost &costCollector,
       boost::make_shared<crocoddyl::CostModelResidual>(
           state_, activation_RF_Wrench, residual_RF_Wrench);
 
-  costCollector.get()->addCost("wrench_LF", wrenchModel_LF,
-                               settings_.wWrenchCone, true);
-  costCollector.get()->addCost("wrench_RF", wrenchModel_RF,
-                               settings_.wWrenchCone, true);
+  costCollector.get()->addCost("wrench_LF", wrenchModel_LF, wWrenchCone, true);
+  costCollector.get()->addCost("wrench_RF", wrenchModel_RF, wWrenchCone, true);
 }
 
 void ModelMaker::defineFeetTracking(Cost &costCollector) {
@@ -140,7 +139,8 @@ void ModelMaker::defineFeetTracking(Cost &costCollector) {
                                settings_.wFootTrans, true);
 }
 
-void ModelMaker::definePostureTask(Cost &costCollector) {
+void ModelMaker::definePostureTask(Cost &costCollector,
+                                   const double wStateReg) {
   if (settings_.stateWeights.size() != designer_.get_rModel().nv * 2) {
     throw std::invalid_argument("State weight size is wrong ");
   }
@@ -154,11 +154,11 @@ void ModelMaker::definePostureTask(Cost &costCollector) {
           boost::make_shared<crocoddyl::ResidualModelState>(
               state_, x0_, actuation_->get_nu()));
 
-  costCollector.get()->addCost("postureTask", postureModel, settings_.wStateReg,
-                               true);
+  costCollector.get()->addCost("postureTask", postureModel, wStateReg, true);
 }
 
-void ModelMaker::defineActuationTask(Cost &costCollector) {
+void ModelMaker::defineActuationTask(Cost &costCollector,
+                                     const double wControlReg) {
   if (settings_.controlWeights.size() != (int)actuation_->get_nu()) {
     throw std::invalid_argument("Control weight size is wrong ");
   }
@@ -171,11 +171,11 @@ void ModelMaker::defineActuationTask(Cost &costCollector) {
           state_, activationWQ,
           boost::make_shared<crocoddyl::ResidualModelControl>(
               state_, actuation_->get_nu()));
-  costCollector.get()->addCost("actuationTask", actuationModel,
-                               settings_.wControlReg, true);
+  costCollector.get()->addCost("actuationTask", actuationModel, wControlReg,
+                               true);
 }
 
-void ModelMaker::defineJointLimits(Cost &costCollector) {
+void ModelMaker::defineJointLimits(Cost &costCollector, const double wLimit) {
   Eigen::VectorXd lower_bound(2 * state_->get_nv()),
       upper_bound(2 * state_->get_nv());
   double inf = 9999.0;
@@ -198,30 +198,27 @@ void ModelMaker::defineJointLimits(Cost &costCollector) {
           boost::make_shared<crocoddyl::ResidualModelState>(
               state_, actuation_->get_nu()));
 
-  costCollector.get()->addCost("jointLimits", jointLimitCost, settings_.wLimit,
-                               true);
+  costCollector.get()->addCost("jointLimits", jointLimitCost, wLimit, true);
 }
 
-void ModelMaker::defineCoMPosition(Cost &costCollector) {
+void ModelMaker::defineCoMPosition(Cost &costCollector, const double wPCoM) {
   eVector3 refPosition = designer_.get_com_position();
   boost::shared_ptr<crocoddyl::CostModelAbstract> CoMPositionCost =
       boost::make_shared<crocoddyl::CostModelResidual>(
           state_, boost::make_shared<ResidualModelCoMPosition>(
                       state_, refPosition, actuation_->get_nu()));
 
-  costCollector.get()->addCost("comPosition", CoMPositionCost, settings_.wPCoM,
-                               true);
+  costCollector.get()->addCost("comPosition", CoMPositionCost, wPCoM, true);
 }
 
-void ModelMaker::defineCoMVelocity(Cost &costCollector) {
+void ModelMaker::defineCoMVelocity(Cost &costCollector, const double wVCoM) {
   eVector3 refVelocity = eVector3::Zero();
   boost::shared_ptr<crocoddyl::CostModelAbstract> CoMVelocityCost =
       boost::make_shared<crocoddyl::CostModelResidual>(
           state_, boost::make_shared<ResidualModelCoMVelocity>(
                       state_, refVelocity, actuation_->get_nu()));
 
-  costCollector.get()->addCost("comVelocity", CoMVelocityCost, settings_.wVCoM,
-                               true);
+  costCollector.get()->addCost("comVelocity", CoMVelocityCost, wVCoM, true);
 }
 
 void ModelMaker::defineCoPTask(Cost &costCollector, const Support &support) {
@@ -256,7 +253,9 @@ void ModelMaker::defineCoPTask(Cost &costCollector, const Support &support) {
     costCollector->changeCostStatus(designer_.get_RF_name() + "_cop", true);
 }
 
-void ModelMaker::defineGripperPlacement(Cost &costCollector) {
+void ModelMaker::defineGripperPlacement(Cost &costCollector,
+                                        const double wGripperPos,
+                                        const double wGripperRot) {
   pinocchio::SE3 goalPlacement = pinocchio::SE3::Identity();
 
   // Position
@@ -269,7 +268,7 @@ void ModelMaker::defineGripperPlacement(Cost &costCollector) {
               actuation_->get_nu()));
 
   costCollector.get()->addCost("gripperPosition", gripperPositionCost,
-                               settings_.wGripperPos, true);
+                               wGripperPos, true);
 
   // Orientation
   boost::shared_ptr<crocoddyl::CostModelAbstract> gripperRotationCost =
@@ -279,10 +278,11 @@ void ModelMaker::defineGripperPlacement(Cost &costCollector) {
                       goalPlacement.rotation(), actuation_->get_nu()));
 
   costCollector.get()->addCost("gripperRotation", gripperRotationCost,
-                               settings_.wGripperRot, true);
+                               wGripperRot, true);
 }
 
-void ModelMaker::defineGripperVelocity(Cost &costCollector) {
+void ModelMaker::defineGripperVelocity(Cost &costCollector,
+                                       const double wGripperVel) {
   pinocchio::Motion goalMotion = pinocchio::Motion(Eigen::VectorXd::Zero(6));
   boost::shared_ptr<crocoddyl::CostModelAbstract> gripperVelocityCost =
       boost::make_shared<crocoddyl::CostModelResidual>(
@@ -291,7 +291,7 @@ void ModelMaker::defineGripperVelocity(Cost &costCollector) {
                       pinocchio::WORLD, actuation_->get_nu()));
 
   costCollector.get()->addCost("gripperVelocity", gripperVelocityCost,
-                               settings_.wGripperVel, true);
+                               wGripperVel, true);
 }
 
 AMA ModelMaker::formulateStepTracker(const Support &support) {
@@ -302,11 +302,11 @@ AMA ModelMaker::formulateStepTracker(const Support &support) {
 
   defineFeetContact(contacts, support);
 
-  defineCoMVelocity(costs);
-  defineJointLimits(costs);
-  definePostureTask(costs);
-  defineActuationTask(costs);
-  defineFeetWrenchCost(costs, support);
+  defineCoMVelocity(costs, settings_.wVCoM);
+  defineJointLimits(costs, settings_.wLimit);
+  definePostureTask(costs, settings_.wStateReg);
+  defineActuationTask(costs, settings_.wControlReg);
+  defineFeetWrenchCost(costs, settings_.wWrenchCone, support);
   defineFeetTracking(costs);
 
   DAM runningDAM =
@@ -327,20 +327,20 @@ AMA ModelMaker::formulateRunningPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineJointLimits(costs);
+  defineJointLimits(costs, settings_.wLimit);
 
   // Equilibrium constraints
-  defineCoMPosition(costs);
-  defineCoMVelocity(costs);
-  defineFeetWrenchCost(costs, Support::DOUBLE);
+  defineCoMPosition(costs, settings_.wPCoM);
+  defineCoMVelocity(costs, settings_.wVCoM);
+  defineFeetWrenchCost(costs, settings_.wWrenchCone, Support::DOUBLE);
 
   // Regulation task
-  definePostureTask(costs);
-  defineActuationTask(costs);
-  
+  definePostureTask(costs, settings_.wStateReg);
+  defineActuationTask(costs, settings_.wControlReg);
+
   // End effector task
-  defineGripperPlacement(costs);
-  defineGripperVelocity(costs);
+  defineGripperPlacement(costs, settings_.wGripperPos, settings_.wGripperRot);
+  defineGripperVelocity(costs, settings_.wGripperVel);
 
   DAM runningDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
@@ -358,24 +358,24 @@ AMA ModelMaker::formulateTerminalPointingTask() {
       boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
 
   // Safety constraints
-  defineJointLimits(costs);
+  defineJointLimits(costs, settings_.wLimit);
 
   // Equilibrium constraints
-  defineCoMPosition(costs);
-  defineCoMVelocity(costs);
+  defineCoMPosition(costs, settings_.wPCoM);
+  defineCoMVelocity(costs, settings_.wVCoM);
 
   // Regulation task
-  definePostureTask(costs);
-  
+  definePostureTask(costs, settings_.wStateReg);
+
   // End effector task
-  defineGripperPlacement(costs);
-  defineGripperVelocity(costs);
+  defineGripperPlacement(costs, settings_.wGripperPos, settings_.wGripperRot);
+  defineGripperVelocity(costs, settings_.wGripperVel);
 
   DAM runningDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state_, actuation_, contacts, costs, 0., true);
-  AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
-      runningDAM, 0);
+  AMA runningModel =
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 0);
 
   return runningModel;
 }
