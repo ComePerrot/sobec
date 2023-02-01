@@ -114,9 +114,13 @@ add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
 target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(${PROJECT_NAME} PUBLIC crocoddyl::crocoddyl
                                              ndcurves::ndcurves yaml-cpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX
-                                                 INSTALL_RPATH "\$ORIGIN")
-
+if (NOT APPLE)
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX
+                                                   INSTALL_RPATH "\$ORIGIN")
+else()
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX
+						   INSTALL_RPATH "${CMAKE_INSTALL_RPATH}")
+endif()
 if(SUFFIX_SO_VERSION)
   set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})
 endif()
