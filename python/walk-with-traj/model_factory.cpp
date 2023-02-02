@@ -155,7 +155,7 @@ void defineJointLimits(ModelMaker &self,
                        crocoddyl::CostModelSum &costCollector,
                        const double wLimit) {
   Cost costs = boost::make_shared<crocoddyl::CostModelSum>(costCollector);
-  self.defineJointLimits(costs, wLimit);
+  self.defineJointLimits(costs, wLimit, 1.0);
   costCollector = *costs;
 }
 
