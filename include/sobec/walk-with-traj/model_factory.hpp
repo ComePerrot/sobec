@@ -50,6 +50,8 @@ struct ModelMakerSettings {
   double wGripperRot = 0;
   double wGripperVel = 0;
 
+  double scaleLimits = 1;
+
   Eigen::VectorXd stateWeights;
   Eigen::VectorXd controlWeights;
 
@@ -89,7 +91,7 @@ class ModelMaker {
   void defineFeetTracking(Cost &costCollector);
   void definePostureTask(Cost &costCollector, const double wStateReg);
   void defineActuationTask(Cost &costCollector, const double wControlReg);
-  void defineJointLimits(Cost &costCollector, const double wLimit);
+  void defineJointLimits(Cost &costCollector, const double wLimit, const double boundScale);
   void defineCoMPosition(Cost &costCollector, const double wPCoM);
   void defineCoMVelocity(Cost &costCollector, const double wVCoM);
   void defineCoPTask(Cost &costCollector,

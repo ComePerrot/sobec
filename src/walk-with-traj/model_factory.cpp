@@ -175,7 +175,7 @@ void ModelMaker::defineActuationTask(Cost &costCollector,
                                true);
 }
 
-void ModelMaker::defineJointLimits(Cost &costCollector, const double wLimit) {
+void ModelMaker::defineJointLimits(Cost &costCollector, const double wLimit, const double boundScale) {
   Eigen::VectorXd lower_bound(2 * state_->get_nv()),
       upper_bound(2 * state_->get_nv());
   double inf = 9999.0;
@@ -188,7 +188,7 @@ void ModelMaker::defineJointLimits(Cost &costCollector, const double wLimit) {
       Eigen::VectorXd::Constant(state_->get_nv(), inf);
 
   crocoddyl::ActivationBounds bounds =
-      crocoddyl::ActivationBounds(lower_bound, upper_bound, 1.);
+      crocoddyl::ActivationBounds(lower_bound, upper_bound, boundScale);
 
   boost::shared_ptr<crocoddyl::ActivationModelQuadraticBarrier> activationQB =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
@@ -303,7 +303,7 @@ AMA ModelMaker::formulateStepTracker(const Support &support) {
   defineFeetContact(contacts, support);
 
   defineCoMVelocity(costs, settings_.wVCoM);
-  defineJointLimits(costs, settings_.wLimit);
+  defineJointLimits(costs, settings_.wLimit, 1.0);
   definePostureTask(costs, settings_.wStateReg);
   defineActuationTask(costs, settings_.wControlReg);
   defineFeetWrenchCost(costs, settings_.wWrenchCone, support);
@@ -327,7 +327,7 @@ AMA ModelMaker::formulateRunningPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineJointLimits(costs, settings_.wLimit);
+  defineJointLimits(costs, settings_.wLimit, 1.0);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.wPCoM);
@@ -358,7 +358,7 @@ AMA ModelMaker::formulateTerminalPointingTask() {
       boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
 
   // Safety constraints
-  defineJointLimits(costs, settings_.wLimit);
+  defineJointLimits(costs, settings_.wLimit, 1.0);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.wPCoM);
