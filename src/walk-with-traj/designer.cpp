@@ -125,6 +125,17 @@ void RobotDesigner::updateCompleteModel(const Eigen::VectorXd &x) {
   RF_position_ = rData_.oMf[rightFootId_].translation();
 }
 
+void RobotDesigner::updateModelLimits(
+    const Eigen::VectorXd lowerPositionLimit,
+    const Eigen::VectorXd upperPositionLimit) {
+  if ((rModel_.lowerPositionLimit.size() != lowerPositionLimit.size()) ||
+      (rModel_.upperPositionLimit.size() != upperPositionLimit.size())) {
+    throw std::runtime_error("Provided limit vector size does not match");
+  }
+  rModel_.lowerPositionLimit = lowerPositionLimit;
+  rModel_.upperPositionLimit = upperPositionLimit;
+}
+
 void RobotDesigner::addEndEffectorFrame(std::string endEffectorName,
                                         std::string parentName,
                                         pinocchio::SE3 endEffectorPlacement) {
