@@ -56,6 +56,8 @@ class RobotDesigner {
   void updateReducedModel(const Eigen::VectorXd &x);
   void updateCompleteModel(const Eigen::VectorXd &x);
 
+  void updateModelLimits(const Eigen::VectorXd lowerPositionLimit,
+                         const Eigen::VectorXd upperPositionLimit);
   void addEndEffectorFrame(std::string endEffectorName, std::string parentName,
                            pinocchio::SE3 endEffectorPlacement);
 
