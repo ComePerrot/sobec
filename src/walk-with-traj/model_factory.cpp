@@ -327,7 +327,7 @@ AMA ModelMaker::formulateRunningPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineJointLimits(costs, settings_.wLimit, 1.0);
+  defineJointLimits(costs, settings_.wLimit, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.wPCoM);
@@ -358,7 +358,7 @@ AMA ModelMaker::formulateTerminalPointingTask() {
       boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
 
   // Safety constraints
-  defineJointLimits(costs, settings_.wLimit, 1.0);
+  defineJointLimits(costs, settings_.wLimit, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.wPCoM);
