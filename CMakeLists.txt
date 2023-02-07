@@ -79,12 +79,12 @@ set(${PROJECT_NAME}_HEADERS
     include/${PROJECT_NAME}/crocomplements/residual-cop.hxx
     include/${PROJECT_NAME}/crocomplements/residual-feet-collision.hxx
     include/${PROJECT_NAME}/crocomplements/residual-vel-collision.hxx
-    include/${PROJECT_NAME}/crocomplements/contact/contact3d.hxx
-    include/${PROJECT_NAME}/crocomplements/contact/contact1d.hxx
-    include/${PROJECT_NAME}/crocomplements/contact/multiple-contacts.hxx
-    include/${PROJECT_NAME}/crocomplements/contact/contact-fwddyn.hxx
-    include/${PROJECT_NAME}/crocomplements/contact/contact-force.hxx
-    include/${PROJECT_NAME}/crocomplements/residual-fly-high.hxx
+    # include/${PROJECT_NAME}/crocomplements/contact/contact3d.hxx
+    # include/${PROJECT_NAME}/crocomplements/contact/contact1d.hxx
+    # include/${PROJECT_NAME}/crocomplements/contact/multiple-contacts.hxx
+    # include/${PROJECT_NAME}/crocomplements/contact/contact-fwddyn.hxx
+    # include/${PROJECT_NAME}/crocomplements/contact/contact-force.hxx
+    # include/${PROJECT_NAME}/crocomplements/residual-fly-high.hxx
     include/${PROJECT_NAME}/walk-without-think/ocp.hpp
     include/${PROJECT_NAME}/walk-without-think/mpc.hpp
     include/${PROJECT_NAME}/walk-without-think/mpc.hxx
