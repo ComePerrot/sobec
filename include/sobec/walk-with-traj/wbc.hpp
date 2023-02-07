@@ -82,7 +82,7 @@ class WBC {
   Eigen::VectorXd x_internal_;
   bool time_to_solve_ddp_ = false;
   bool first_switch_to_stand_ = true;
-  std::set<std::string> contacts_before_, contacts_after_;
+  std::vector<std::string> contacts_before_, contacts_after_;
   supportSwitch switch_;
   int horizon_end_;
 

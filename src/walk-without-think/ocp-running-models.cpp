@@ -25,8 +25,9 @@ std::vector<AMA> OCPWalk::buildRunningModels() {
          ++k) {  // k, cid in enumerate(robot.contactIds):
       if (contact_pattern(k, i) == 0.0) continue;
       int cid = robot->contactIds[k];
+      FramePlacement xref(cid, pinocchio::SE3::Identity());
       auto contact = boost::make_shared<crocoddyl::ContactModel6D>(
-          state, cid, pinocchio::SE3::Identity(), actuation->get_nu(),
+          state, xref, actuation->get_nu(),
           params->baumgartGains);
       contacts->addContact(robot->model->frames[cid].name + "_contact",
                            contact);

@@ -32,14 +32,16 @@ void ModelMaker::initialize(const ModelMakerSettings &settings,
 
 void ModelMaker::defineFeetContact(Contact &contactCollector,
                                    const Support &support) {
+  FramePlacement LF_ref(designer_.get_LF_id(), designer_.get_LF_frame());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelLeft =
       boost::make_shared<crocoddyl::ContactModel6D>(
-          state_, designer_.get_LF_id(), designer_.get_LF_frame(),
+          state_, LF_ref,
           actuation_->get_nu(), eVector2(0., 50.));
 
+  FramePlacement RF_ref(designer_.get_RF_id(), designer_.get_RF_frame());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelRight =
       boost::make_shared<crocoddyl::ContactModel6D>(
-          state_, designer_.get_RF_id(), designer_.get_RF_frame(),
+          state_, RF_ref,
           actuation_->get_nu(), eVector2(0., 50.));
 
   contactCollector->addContact(designer_.get_LF_name(), ContactModelLeft,

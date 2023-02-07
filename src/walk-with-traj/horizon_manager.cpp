@@ -259,16 +259,18 @@ unsigned long HorizonManager::size() {
 int HorizonManager::supportSize(const unsigned long time) {
   get_contacts(time);
   support_size_ = 2;
-  if (active_contacts_.find(settings_.leftFootName) == active_contacts_.end())
+  if (find(active_contacts_.begin(), active_contacts_.end(),
+			  settings_.leftFootName) == active_contacts_.end())
     support_size_ -= 1;
-  if (active_contacts_.find(settings_.rightFootName) == active_contacts_.end())
+  if (find(active_contacts_.begin(),active_contacts_.end(),
+			  settings_.rightFootName) == active_contacts_.end())
     support_size_ -= 1;
   return support_size_;
 }
 
-const std::set<std::string> &HorizonManager::get_contacts(
+const std::vector<std::string>& HorizonManager::get_contacts(
     const unsigned long time) {
-  active_contacts_ = contacts(time)->get_active_set();
+  active_contacts_ = contacts(time)->get_active();
   return active_contacts_;
 }
 
