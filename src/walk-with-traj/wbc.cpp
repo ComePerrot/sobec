@@ -269,7 +269,8 @@ const supportSwitch &WBC::getSwitches(const unsigned long before,
     return switch_;
   }
   if (horizon_.supportSize(before) == 2) {
-    if (contacts_after_.find(designer_.get_LF_name()) ==
+    if (find(contacts_after_.begin(),
+	     contacts_after_.end(),designer_.get_LF_name()) ==
         contacts_after_.end()) {
       switch_ = TAKEOFF_LF;  // case LF not in contact_after
       return switch_;
@@ -277,7 +278,9 @@ const supportSwitch &WBC::getSwitches(const unsigned long before,
     switch_ = TAKEOFF_RF;  // case RF not in contact_after
     return switch_;
   }
-  if (contacts_before_.find(designer_.get_LF_name()) ==
+  if (find(contacts_before_.begin(),
+	   contacts_before_.end(),	
+ 	   designer_.get_LF_name()) ==
       contacts_before_.end()) {
     switch_ = LAND_LF;  // case LF not in contact_before
     return switch_;
