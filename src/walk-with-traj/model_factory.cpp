@@ -216,7 +216,7 @@ void ModelMaker::defineAnticipatedJointLimits(Cost &costCollector,
       state_->get_nq() - 7);
 
   crocoddyl::ActivationBounds bounds =
-      crocoddyl::ActivationBounds(lower_bound, upper_bound, boundScale);
+      crocoddyl::ActivationBounds(lower_bound, upper_bound);
 
   boost::shared_ptr<crocoddyl::ActivationModelQuadraticBarrier> activationQB =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
@@ -388,7 +388,7 @@ AMA ModelMaker::formulateTerminalPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineJointLimits(costs, 0, settings_.scaleLimits);
+  defineAnticipatedJointLimits(costs, 0, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, 500);
