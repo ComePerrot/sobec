@@ -91,7 +91,10 @@ class ModelMaker {
   void defineFeetTracking(Cost &costCollector);
   void definePostureTask(Cost &costCollector, const double wStateReg);
   void defineActuationTask(Cost &costCollector, const double wControlReg);
-  void defineJointLimits(Cost &costCollector, const double wLimit, const double boundScale);
+  void defineJointLimits(Cost &costCollector, const double wLimit,
+                         const double boundScale);
+  void defineAnticipatedJointLimits(Cost &costCollector, const double wLimit,
+                                    const double boundScale);
   void defineCoMPosition(Cost &costCollector, const double wPCoM);
   void defineCoMVelocity(Cost &costCollector, const double wVCoM);
   void defineCoPTask(Cost &costCollector,
