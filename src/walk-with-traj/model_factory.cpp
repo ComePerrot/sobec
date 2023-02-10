@@ -36,12 +36,12 @@ void ModelMaker::defineFeetContact(Contact &contactCollector,
   FramePlacement LF_ref(designer_.get_LF_id(), designer_.get_LF_frame());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelLeft =
       boost::make_shared<crocoddyl::ContactModel6D>(
-          state_, LF_ref, actuation_->get_nu(), eVector2(0., 50.));
+          state_, LF_ref, actuation_->get_nu(), eVector2(0., 4.));
 
   FramePlacement RF_ref(designer_.get_RF_id(), designer_.get_RF_frame());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelRight =
       boost::make_shared<crocoddyl::ContactModel6D>(
-          state_, RF_ref, actuation_->get_nu(), eVector2(0., 50.));
+          state_, RF_ref, actuation_->get_nu(), eVector2(0., 4.));
 
   contactCollector->addContact(designer_.get_LF_name(), ContactModelLeft,
                                false);
@@ -216,7 +216,7 @@ void ModelMaker::defineAnticipatedJointLimits(Cost &costCollector,
       state_->get_nq() - 7);
 
   crocoddyl::ActivationBounds bounds =
-      crocoddyl::ActivationBounds(lower_bound, upper_bound, boundScale);
+      crocoddyl::ActivationBounds(lower_bound, upper_bound);
 
   boost::shared_ptr<crocoddyl::ActivationModelQuadraticBarrier> activationQB =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
@@ -388,7 +388,7 @@ AMA ModelMaker::formulateTerminalPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineJointLimits(costs, 0, settings_.scaleLimits);
+  defineAnticipatedJointLimits(costs, 0, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, 500);
