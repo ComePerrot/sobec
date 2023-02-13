@@ -66,6 +66,7 @@ class ModelMaker {
   boost::shared_ptr<crocoddyl::StateMultibody> state_;
   boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation_;
   Eigen::VectorXd x0_;
+  Eigen::VectorXd armature_;
 
  public:
   ModelMaker();

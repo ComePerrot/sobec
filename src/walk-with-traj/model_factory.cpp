@@ -20,6 +20,8 @@ void ModelMaker::initialize(const ModelMakerSettings &settings,
   settings_ = settings;
   designer_ = designer;
 
+  auto pin_model_ = designer_.get_rModel();
+
   state_ = boost::make_shared<crocoddyl::StateMultibody>(
       boost::make_shared<pinocchio::Model>(designer_.get_rModel()));
   actuation_ =
@@ -27,6 +29,11 @@ void ModelMaker::initialize(const ModelMakerSettings &settings,
 
   x0_.resize(designer_.get_rModel().nq + designer_.get_rModel().nv);
   x0_ << designer_.get_q0(), Eigen::VectorXd::Zero(designer_.get_rModel().nv);
+
+  armature_ = Eigen::VectorXd::Zero(pin_model_.nv);
+  armature_[(long)pin_model_.getJointId("arm_left_5_joint") + 4] = 0.1;  // 0.7
+  armature_[(long)pin_model_.getJointId("arm_left_6_joint") + 4] = 0.1;  // 0.7
+  armature_[(long)pin_model_.getJointId("arm_left_7_joint") + 4] = 0.1;  // 1
 
   initialized_ = true;
 }
@@ -169,7 +176,7 @@ void ModelMaker::defineActuationTask(Cost &costCollector,
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> actuationModel =
       boost::make_shared<crocoddyl::CostModelResidual>(
-          state_, activationWQ,
+          state_,  // activationWQ,
           boost::make_shared<crocoddyl::ResidualModelControl>(
               state_, actuation_->get_nu()));
   costCollector.get()->addCost("actuationTask", actuationModel, wControlReg,
@@ -373,6 +380,7 @@ AMA ModelMaker::formulateRunningPointingTask() {
   DAM runningDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state_, actuation_, contacts, costs, 0., true);
+  runningDAM->set_armature(armature_);
   AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
       runningDAM, settings_.timeStep);
 
@@ -406,6 +414,7 @@ AMA ModelMaker::formulateTerminalPointingTask() {
   DAM runningDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state_, actuation_, contacts, costs, 0., true);
+  runningDAM->set_armature(armature_);
   AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
       runningDAM, settings_.timeStep);
 
