@@ -43,12 +43,12 @@ void ModelMaker::defineFeetContact(Contact &contactCollector,
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelLeft =
       boost::make_shared<crocoddyl::ContactModel6D>(
           state_, designer_.get_LF_id(), designer_.get_LF_frame(),
-          actuation_->get_nu(), eVector2(0., 50.));
+          actuation_->get_nu(), eVector2(0., 4.));
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelRight =
       boost::make_shared<crocoddyl::ContactModel6D>(
           state_, designer_.get_RF_id(), designer_.get_RF_frame(),
-          actuation_->get_nu(), eVector2(0., 50.));
+          actuation_->get_nu(), eVector2(0., 4.));
 
   contactCollector->addContact(designer_.get_LF_name(), ContactModelLeft,
                                false);
@@ -396,27 +396,25 @@ AMA ModelMaker::formulateTerminalPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineAnticipatedJointLimits(costs, 0, settings_.scaleLimits);
+  defineAnticipatedJointLimits(costs, settings_.timeStep*0, settings_.scaleLimits);
 
   // Equilibrium constraints
-  defineCoMPosition(costs, 500);
-  defineCoMVelocity(costs, 0);
-  defineFeetWrenchCost(costs, 0, Support::DOUBLE);
+  defineCoMPosition(costs, settings_.timeStep*500);
+  defineCoMVelocity(costs, settings_.timeStep*0);
 
   // Regulation task
-  definePostureTask(costs, 0.02);
-  defineActuationTask(costs, 0);
+  definePostureTask(costs, settings_.timeStep*0.02);
 
   // End effector task
-  defineGripperPlacement(costs, 50, 150);
-  defineGripperVelocity(costs, 100);
+  defineGripperPlacement(costs, settings_.timeStep*50, settings_.timeStep*150);
+  defineGripperVelocity(costs, settings_.timeStep*100);
 
   DAM runningDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state_, actuation_, contacts, costs, 0., true);
   runningDAM->set_armature(armature_);
   AMA runningModel = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
-      runningDAM, settings_.timeStep);
+      runningDAM, 0);
 
   return runningModel;
 }
