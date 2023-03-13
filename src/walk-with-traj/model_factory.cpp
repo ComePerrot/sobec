@@ -362,7 +362,8 @@ AMA ModelMaker::formulateRunningPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineAnticipatedJointLimits(costs, settings_.wLimit, settings_.scaleLimits);
+  defineJointLimits(costs, settings_.wLimit, settings_.scaleLimits);
+//   defineAnticipatedJointLimits(costs, settings_.wLimit, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.wPCoM);
@@ -396,7 +397,8 @@ AMA ModelMaker::formulateTerminalPointingTask() {
   defineFeetContact(contacts, Support::DOUBLE);
 
   // Safety constraints
-  defineAnticipatedJointLimits(costs, settings_.timeStep*0, settings_.scaleLimits);
+  defineJointLimits(costs, settings_.timeStep*0, settings_.scaleLimits);
+//   defineAnticipatedJointLimits(costs, settings_.timeStep*0, settings_.scaleLimits);
 
   // Equilibrium constraints
   defineCoMPosition(costs, settings_.timeStep*500);
