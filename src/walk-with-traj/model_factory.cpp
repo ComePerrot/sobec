@@ -176,7 +176,7 @@ void ModelMaker::defineActuationTask(Cost &costCollector,
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> actuationModel =
       boost::make_shared<crocoddyl::CostModelResidual>(
-          state_,  // activationWQ,
+          state_, activationWQ,
           boost::make_shared<crocoddyl::ResidualModelControl>(
               state_, actuation_->get_nu()));
   costCollector.get()->addCost("actuationTask", actuationModel, wControlReg,
